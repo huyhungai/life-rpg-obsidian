@@ -1,0 +1,18 @@
+# Node
+node_modules/
+npm-debug.log
+
+# Build
+*.js.map
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.idea/
+.vscode/
+*.sublime-*
+
+# Screenshots (optional - remove if you want to include them)
+# Screenshot/

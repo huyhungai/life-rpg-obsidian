@@ -1,0 +1,10 @@
+{
+  "id": "life-rpg",
+  "name": "Life RPG",
+  "version": "3.0.0",
+  "minAppVersion": "0.15.0",
+  "description": "A gamification plugin with 9 GNH life domains, character creation assessment, RPG mechanics, and AI Life Coach integration.",
+  "author": "Huy Hung",
+  "authorUrl": "https://github.com/obsidianmd/obsidian-sample-plugin",
+  "isDesktopOnly": false
+}
