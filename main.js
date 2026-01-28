@@ -197,7 +197,8 @@ const DEFAULT_ACHIEVEMENTS = [
     { id: 'quests_5', name: 'Quest Champion', desc: 'Complete 5 quests', icon: '⚔️', unlocked: false, reward: 150 },
     { id: 'streak_30', name: 'Monthly Legend', desc: '30-day streak on any habit', icon: '👑', unlocked: false, reward: 300 },
     { id: 'level_10', name: 'Veteran', desc: 'Reach Level 10', icon: '🎖️', unlocked: false, reward: 250 },
-    { id: 'character_created', name: 'Self-Discovery', desc: 'Complete character assessment', icon: '🎭', unlocked: false, reward: 100 },
+    { id: 'character_created', name: 'New Beginning', desc: 'Create your character', icon: '🎭', unlocked: false, reward: 25 },
+    { id: 'journey_complete', name: 'Self-Discovery', desc: 'Complete the 37-question journey', icon: '🧭', unlocked: false, reward: 100 },
     { id: 'all_domains_50', name: 'Well Rounded', desc: 'All domains at 50+', icon: '🌈', unlocked: false, reward: 500 },
     { id: 'ai_coach_first', name: 'Seeking Wisdom', desc: 'Chat with AI Coach for the first time', icon: '🤖', unlocked: false, reward: 50 },
     { id: 'ai_quests_5', name: 'AI Collaborator', desc: 'Generate 5 quests with AI', icon: '✨', unlocked: false, reward: 100 }
@@ -500,22 +501,14 @@ class CharacterCreationModal extends Modal {
     renderWelcome() {
         const { contentEl } = this;
 
-        contentEl.createEl('h2', { text: '🎭 Character Creation' });
-        contentEl.createEl('p', {
-            text: 'Welcome to your Life RPG character assessment! This journey will help you discover your strengths and growth areas across 9 life domains.',
-            cls: 'rpg-modal-intro'
-        });
-        contentEl.createEl('p', {
-            text: "You'll answer 37 questions using a simple agree/disagree scale. Be honest - there are no right or wrong answers, only your current reality.",
-            cls: 'rpg-modal-intro'
-        });
+        contentEl.createEl('h2', { text: '🎭 Create Your Character' });
 
         const nameSection = contentEl.createDiv({ cls: 'rpg-name-section' });
-        nameSection.createEl('label', { text: 'What should we call your character?' });
+        nameSection.createEl('label', { text: 'What should we call you?' });
 
         const nameInput = nameSection.createEl('input', {
             type: 'text',
-            placeholder: 'Enter your character name...',
+            placeholder: 'Enter your name...',
             cls: 'rpg-name-input'
         });
         nameInput.value = this.characterName;
@@ -523,18 +516,97 @@ class CharacterCreationModal extends Modal {
             this.characterName = e.target.value;
         });
 
-        const btnContainer = contentEl.createDiv({ cls: 'rpg-modal-buttons' });
-        const startBtn = btnContainer.createEl('button', {
-            text: 'Begin Assessment →',
+        contentEl.createEl('h3', { text: 'Choose Your Path', cls: 'rpg-path-title' });
+
+        const pathsContainer = contentEl.createDiv({ cls: 'rpg-paths-container' });
+
+        // Quick Start Path
+        const quickPath = pathsContainer.createDiv({ cls: 'rpg-path-card' });
+        quickPath.createDiv({ cls: 'rpg-path-icon', text: '⚡' });
+        quickPath.createEl('h4', { text: 'Quick Start' });
+        quickPath.createEl('p', {
+            text: 'Jump right in! Start with balanced stats and discover yourself through gameplay.',
+            cls: 'rpg-path-desc'
+        });
+        quickPath.createDiv({ cls: 'rpg-path-reward', text: 'Start at Level 1' });
+        const quickBtn = quickPath.createEl('button', {
+            text: 'Start Adventure →',
             cls: 'rpg-primary-btn'
         });
-        startBtn.onclick = () => {
+        quickBtn.onclick = () => {
+            if (!this.characterName.trim()) {
+                this.characterName = 'Hero';
+            }
+            this.quickStart();
+        };
+
+        // Discovery Journey Path
+        const journeyPath = pathsContainer.createDiv({ cls: 'rpg-path-card journey' });
+        journeyPath.createDiv({ cls: 'rpg-path-icon', text: '🧭' });
+        journeyPath.createEl('h4', { text: 'Discovery Journey' });
+        journeyPath.createEl('p', {
+            text: 'Answer 37 questions to discover your true strengths. Earn XP for each answer!',
+            cls: 'rpg-path-desc'
+        });
+        journeyPath.createDiv({ cls: 'rpg-path-reward', text: '+5 XP per question • +50 bonus XP' });
+        const journeyBtn = journeyPath.createEl('button', {
+            text: 'Begin Journey →',
+            cls: 'rpg-secondary-btn'
+        });
+        journeyBtn.onclick = () => {
             if (!this.characterName.trim()) {
                 this.characterName = 'Hero';
             }
             this.currentStep = 'domain_intro';
             this.render();
         };
+
+        contentEl.createEl('p', {
+            text: "💡 Tip: You can always take the Discovery Journey later from your Character tab!",
+            cls: 'rpg-modal-tip'
+        });
+    }
+
+    async quickStart() {
+        const s = this.plugin.settings;
+
+        // Set default domain scores (all at 50%)
+        s.domains = DEFAULT_DOMAINS.map(d => ({
+            ...d,
+            score: 50,
+            level: 1,
+            xp: 0
+        }));
+
+        s.characterProfile = {
+            name: this.characterName,
+            createdAt: new Date().toISOString(),
+            assessmentComplete: false,  // Journey not completed
+            assessmentResponses: [],
+            questionsAnswered: 0
+        };
+
+        s.level = 1;
+        s.maxHp = 110;
+        s.hp = s.maxHp;
+        s.xp = 0;
+
+        await this.plugin.saveSettings();
+
+        // Award character_created achievement
+        const ach = s.achievements.find(a => a.id === 'character_created');
+        if (ach && !ach.unlocked) {
+            ach.unlocked = true;
+            s.gold += ach.reward;
+            s.totalGoldEarned = (s.totalGoldEarned || 0) + ach.reward;
+            await this.plugin.saveSettings();
+            new Notice(`🏆 Achievement: ${ach.name}! +${ach.reward}g`);
+        }
+
+        new Notice(`⚡ Character "${this.characterName}" created! Level 1`);
+
+        this.close();
+        if (this.onComplete) this.onComplete();
     }
 
     renderDomainIntro() {
@@ -620,12 +692,22 @@ class CharacterCreationModal extends Modal {
         }
     }
 
-    submitResponse(questionId, value) {
+    async submitResponse(questionId, value) {
         const existingIdx = this.responses.findIndex(r => r.questionId === questionId);
+        const isNewAnswer = existingIdx < 0;
+
         if (existingIdx >= 0) {
             this.responses[existingIdx].value = value;
         } else {
             this.responses.push({ questionId, value });
+        }
+
+        // Award XP for new answers
+        if (isNewAnswer) {
+            const xpReward = 5;
+            this.plugin.settings.xp += xpReward;
+            await this.plugin.saveSettings();
+            new Notice(`+${xpReward} XP for answering!`);
         }
 
         const domainId = DOMAIN_ORDER[this.currentDomainIndex];
@@ -664,7 +746,15 @@ class CharacterCreationModal extends Modal {
         const level = calculateLevelFromScores(domainScores);
         const title = getCharacterTitle(level);
 
-        contentEl.createEl('h2', { text: '🎉 Assessment Complete!' });
+        contentEl.createEl('h2', { text: '🎉 Journey Complete!' });
+
+        // Show rewards earned
+        const rewardsBox = contentEl.createDiv({ cls: 'rpg-rewards-box' });
+        rewardsBox.createEl('h4', { text: '🎁 Rewards Earned' });
+        const totalXP = (this.responses.length * 5) + 50; // 5 per question + 50 bonus
+        rewardsBox.createDiv({ cls: 'rpg-reward-item', text: `✨ ${this.responses.length * 5} XP from questions` });
+        rewardsBox.createDiv({ cls: 'rpg-reward-item bonus', text: `🌟 +50 XP completion bonus!` });
+        rewardsBox.createDiv({ cls: 'rpg-reward-total', text: `Total: ${totalXP} XP` });
 
         const card = contentEl.createDiv({ cls: 'rpg-character-card' });
         card.createDiv({ cls: 'rpg-card-title', text: title });
@@ -716,7 +806,7 @@ class CharacterCreationModal extends Modal {
 
         const btnContainer = contentEl.createDiv({ cls: 'rpg-modal-buttons' });
         const confirmBtn = btnContainer.createEl('button', {
-            text: '✨ Create Character',
+            text: '✨ Apply Results',
             cls: 'rpg-primary-btn'
         });
         confirmBtn.onclick = () => {
@@ -726,6 +816,7 @@ class CharacterCreationModal extends Modal {
 
     async finalizeCharacter(domainScores, level) {
         const s = this.plugin.settings;
+        const isNewCharacter = !s.characterProfile?.name;
 
         s.domains = DEFAULT_DOMAINS.map(d => ({
             ...d,
@@ -734,30 +825,47 @@ class CharacterCreationModal extends Modal {
             xp: 0
         }));
 
+        // Give completion bonus XP
+        const bonusXP = 50;
+        s.xp += bonusXP;
+
         s.characterProfile = {
-            name: this.characterName,
-            createdAt: new Date().toISOString(),
+            name: this.characterName || s.characterProfile?.name || 'Hero',
+            createdAt: s.characterProfile?.createdAt || new Date().toISOString(),
             assessmentComplete: true,
-            assessmentResponses: this.responses
+            assessmentResponses: this.responses,
+            questionsAnswered: this.responses.length
         };
 
         s.level = level;
         s.maxHp = 100 + (level * 10);
         s.hp = s.maxHp;
-        s.xp = 0;
 
         await this.plugin.saveSettings();
 
-        const ach = s.achievements.find(a => a.id === 'character_created');
-        if (ach && !ach.unlocked) {
-            ach.unlocked = true;
-            s.gold += ach.reward;
-            s.totalGoldEarned += ach.reward;
+        // Check for journey completion achievement
+        const journeyAch = s.achievements.find(a => a.id === 'journey_complete');
+        if (journeyAch && !journeyAch.unlocked) {
+            journeyAch.unlocked = true;
+            s.gold += journeyAch.reward;
+            s.totalGoldEarned += journeyAch.reward;
             await this.plugin.saveSettings();
-            new Notice(`🏆 Achievement Unlocked: ${ach.name}! +${ach.reward}g`);
+            new Notice(`🏆 Achievement Unlocked: ${journeyAch.name}! +${journeyAch.reward}g`);
         }
 
-        new Notice(`🎭 Character "${this.characterName}" created at Level ${level}!`);
+        // Also check character_created if new
+        if (isNewCharacter) {
+            const ach = s.achievements.find(a => a.id === 'character_created');
+            if (ach && !ach.unlocked) {
+                ach.unlocked = true;
+                s.gold += ach.reward;
+                s.totalGoldEarned += ach.reward;
+                await this.plugin.saveSettings();
+                new Notice(`🏆 Achievement Unlocked: ${ach.name}! +${ach.reward}g`);
+            }
+        }
+
+        new Notice(`🎉 Journey complete! +${bonusXP} bonus XP! Now Level ${level}!`);
 
         this.close();
         if (this.onComplete) this.onComplete();
@@ -1018,10 +1126,11 @@ class HeroView extends ItemView {
         const s = this.plugin.settings;
         container.createEl("h3", { text: "🎭 Character Profile" });
 
-        if (!s.characterProfile?.assessmentComplete) {
+        // No character created yet
+        if (!s.characterProfile?.name) {
             const emptyState = container.createDiv({ cls: 'rpg-empty-character' });
-            emptyState.createEl('p', { text: "You haven't created your character yet!" });
-            emptyState.createEl('p', { text: "Take the Life Assessment to discover your strengths and growth areas across 9 life domains." });
+            emptyState.createEl('p', { text: "Welcome, adventurer!" });
+            emptyState.createEl('p', { text: "Create your character to begin your Life RPG journey." });
 
             const createBtn = container.createEl('button', {
                 text: '✨ Create Your Character',
@@ -1033,10 +1142,36 @@ class HeroView extends ItemView {
             return;
         }
 
+        // Character card
         const card = container.createDiv({ cls: 'rpg-character-display' });
         card.createDiv({ cls: 'rpg-char-title', text: getCharacterTitle(s.level) });
         card.createEl('h2', { text: s.characterProfile.name });
         card.createDiv({ cls: 'rpg-char-level', text: `Level ${s.level}` });
+
+        // Show Discovery Journey prompt if not completed
+        if (!s.characterProfile.assessmentComplete) {
+            const journeyBox = container.createDiv({ cls: 'rpg-journey-prompt' });
+            journeyBox.createEl('h4', { text: '🧭 Discovery Journey' });
+            journeyBox.createEl('p', {
+                text: 'Answer 37 questions to discover your true strengths and unlock your full potential!',
+                cls: 'rpg-journey-desc'
+            });
+
+            const rewardsInfo = journeyBox.createDiv({ cls: 'rpg-journey-rewards' });
+            rewardsInfo.createSpan({ text: '🎁 Rewards: ' });
+            rewardsInfo.createSpan({ text: '+5 XP per question • +50 bonus XP • Accurate domain scores', cls: 'rpg-journey-reward-text' });
+
+            const journeyBtn = journeyBox.createEl('button', {
+                text: '🧭 Start Discovery Journey',
+                cls: 'rpg-full-width-btn journey'
+            });
+            journeyBtn.onclick = () => {
+                const modal = new CharacterCreationModal(this.app, this.plugin, () => this.render());
+                modal.characterName = s.characterProfile.name;
+                modal.currentStep = 'domain_intro';
+                modal.open();
+            };
+        }
 
         const createdDate = new Date(s.characterProfile.createdAt).toLocaleDateString();
         card.createDiv({ cls: 'rpg-char-created', text: `Created: ${createdDate}` });

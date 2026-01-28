@@ -719,6 +719,165 @@
     background: var(--background-modifier-hover);
 }
 
+/* ============================================================================
+   CHARACTER CREATION - PATH SELECTION
+   ============================================================================ */
+
+.rpg-path-title {
+    margin: 20px 0 15px;
+    font-size: 1em;
+    color: var(--text-muted);
+}
+
+.rpg-paths-container {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 15px;
+    margin: 15px 0;
+}
+
+.rpg-path-card {
+    background: var(--background-secondary);
+    border: 2px solid var(--background-modifier-border);
+    border-radius: 12px;
+    padding: 20px;
+    text-align: center;
+    transition: all 0.2s;
+}
+
+.rpg-path-card:hover {
+    border-color: var(--interactive-accent);
+    transform: translateY(-2px);
+}
+
+.rpg-path-card.journey {
+    border-color: rgba(255, 170, 0, 0.3);
+    background: linear-gradient(135deg, var(--background-secondary), rgba(255, 170, 0, 0.05));
+}
+
+.rpg-path-card.journey:hover {
+    border-color: var(--rpg-gold-color);
+}
+
+.rpg-path-icon {
+    font-size: 2.5em;
+    margin-bottom: 10px;
+}
+
+.rpg-path-card h4 {
+    margin: 0 0 8px;
+    font-size: 1.1em;
+}
+
+.rpg-path-desc {
+    font-size: 0.85em;
+    color: var(--text-muted);
+    margin: 0 0 12px;
+    line-height: 1.4;
+}
+
+.rpg-path-reward {
+    font-size: 0.8em;
+    color: var(--rpg-gold-color);
+    margin-bottom: 15px;
+    font-weight: bold;
+}
+
+.rpg-path-card .rpg-primary-btn,
+.rpg-path-card .rpg-secondary-btn {
+    width: 100%;
+    padding: 10px;
+}
+
+.rpg-modal-tip {
+    text-align: center;
+    font-size: 0.85em;
+    color: var(--text-muted);
+    margin-top: 15px;
+}
+
+/* ============================================================================
+   JOURNEY PROMPT IN CHARACTER TAB
+   ============================================================================ */
+
+.rpg-journey-prompt {
+    background: linear-gradient(135deg, var(--background-secondary), rgba(255, 170, 0, 0.08));
+    border: 2px solid rgba(255, 170, 0, 0.3);
+    border-radius: 12px;
+    padding: 20px;
+    margin: 20px 0;
+    text-align: center;
+}
+
+.rpg-journey-prompt h4 {
+    margin: 0 0 10px;
+    color: var(--rpg-gold-color);
+}
+
+.rpg-journey-desc {
+    font-size: 0.9em;
+    color: var(--text-muted);
+    margin: 0 0 12px;
+}
+
+.rpg-journey-rewards {
+    font-size: 0.85em;
+    margin-bottom: 15px;
+}
+
+.rpg-journey-reward-text {
+    color: var(--rpg-gold-color);
+}
+
+.rpg-full-width-btn.journey {
+    background: linear-gradient(135deg, #f39c12, #e67e22);
+    color: white;
+    border: none;
+    font-weight: bold;
+}
+
+.rpg-full-width-btn.journey:hover {
+    opacity: 0.9;
+}
+
+/* ============================================================================
+   REWARDS BOX (Journey Complete)
+   ============================================================================ */
+
+.rpg-rewards-box {
+    background: linear-gradient(135deg, rgba(255, 170, 0, 0.1), rgba(255, 170, 0, 0.05));
+    border: 2px solid var(--rpg-gold-color);
+    border-radius: 12px;
+    padding: 15px 20px;
+    margin-bottom: 20px;
+    text-align: center;
+}
+
+.rpg-rewards-box h4 {
+    margin: 0 0 10px;
+    color: var(--rpg-gold-color);
+}
+
+.rpg-reward-item {
+    font-size: 0.9em;
+    margin: 5px 0;
+    color: var(--text-muted);
+}
+
+.rpg-reward-item.bonus {
+    color: var(--rpg-gold-color);
+    font-weight: bold;
+}
+
+.rpg-reward-total {
+    margin-top: 10px;
+    padding-top: 10px;
+    border-top: 1px solid var(--background-modifier-border);
+    font-weight: bold;
+    font-size: 1.1em;
+    color: var(--rpg-xp-color);
+}
+
 /* Progress Bar */
 .rpg-progress-container {
     margin-bottom: 20px;
