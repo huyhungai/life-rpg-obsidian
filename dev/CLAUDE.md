@@ -1,15 +1,25 @@
 # LifeGame Plugin - Project Context
 
-## Project Status: v5.0.0 MODULAR - Active Development
+## Project Status: v5.0.0 MODULAR - Ready for Community Plugin Release
 
 ## What This Is
 An Obsidian plugin that gamifies life using RPG mechanics and 9 GNH (Gross National Happiness) life domains. Now with **modular architecture** for easier development and maintenance.
 
 ## 📁 Project Structure (IMPORTANT!)
 
-### Development Folder (Edit Here)
+### Root Folder (Clean for Users)
 ```
 /Users/buihuyhung/AIProject/LifeGame Plugin/
+├── main.js           ← Built output (308KB, DON'T EDIT!)
+├── manifest.json     ← Plugin metadata
+├── styles.css        ← Plugin styles
+├── package.json      ← Build commands
+└── dev/              ← Development files →
+```
+
+### Development Folder (Edit Here)
+```
+/Users/buihuyhung/AIProject/LifeGame Plugin/dev/
 ├── src/                          ← EDIT THESE FILES
 │   ├── constants.js              ← Configuration (150 lines)
 │   ├── services/
@@ -18,8 +28,11 @@ An Obsidian plugin that gamifies life using RPG mechanics and 9 GNH (Gross Natio
 │       └── HeroView.js           ← ALL UI tabs (2,261 lines)
 ├── main-core.js                  ← Stable code (4,429 lines)
 ├── build.js                      ← Build script
-├── package.json                  ← NPM config
-└── main.js                       ← Generated output (DON'T EDIT!)
+├── scripts/                      ← Build utilities
+└── Documentation/
+    ├── CLAUDE.md (this file)
+    ├── MODULAR-READY.md
+    └── ... (more guides)
 ```
 
 ### Plugin Folder (Obsidian Loads From)
@@ -47,25 +60,25 @@ npm run dev
 ```
 
 ### How It Works
-1. Edit files in `src/`
-2. Run `npm run build` (or use watch mode)
-3. Build combines: `src/constants.js` + `src/services/SkillService.js` + `src/views/HeroView.js` + `main-core.js`
-4. Output: `main.js` (auto-copied to `.obsidian/plugins/life-rpg/`)
+1. Edit files in `dev/src/`
+2. Run `npm run build` from root (or use watch mode)
+3. Build combines: `dev/src/constants.js` + `dev/src/services/SkillService.js` + `dev/src/views/HeroView.js` + `dev/main-core.js`
+4. Output: `main.js` in root (auto-copied to `.obsidian/plugins/life-rpg/`)
 5. Reload plugin in Obsidian
 
 ### Build Flow
 ```
-src/constants.js (150 lines)
+dev/src/constants.js (150 lines)
     +
-src/services/SkillService.js (370 lines)
+dev/src/services/SkillService.js (370 lines)
     +
-src/views/HeroView.js (2,261 lines)
+dev/src/views/HeroView.js (2,261 lines)
     +
-main-core.js (4,429 lines)
+dev/main-core.js (4,429 lines)
     ↓
-[build.js combines]
+[dev/build.js combines]
     ↓
-main.js (7,210 lines total)
+main.js in root (7,268 lines, 308KB)
     ↓
 [auto-copied to]
     ↓
@@ -76,7 +89,7 @@ main.js (7,210 lines total)
 
 ### Extracted Modules
 
-#### 1. src/constants.js (150 lines)
+#### 1. dev/src/constants.js (150 lines)
 **What**: All configuration and settings
 **Contains**:
 - AI_PROVIDERS (OpenRouter, OpenAI, Anthropic, Google)
@@ -91,7 +104,7 @@ main.js (7,210 lines total)
 - Modify default settings
 - Add new models
 
-#### 2. src/services/SkillService.js (370 lines)
+#### 2. dev/src/services/SkillService.js (370 lines)
 **What**: Skill discovery, evolution, and management
 **Contains**:
 - getSkills(), createSkill(), deleteSkill()
@@ -114,7 +127,7 @@ main.js (7,210 lines total)
 - Adjust similarity matching
 - Change XP calculations
 
-#### 3. src/views/HeroView.js (2,261 lines)
+#### 3. dev/src/views/HeroView.js (2,261 lines)
 **What**: ALL UI tabs and rendering
 **Contains**:
 - render() - Main render method
@@ -134,7 +147,7 @@ main.js (7,210 lines total)
 - Update skill display
 - Add UI features
 
-#### 4. main-core.js (4,429 lines)
+#### 4. dev/main-core.js (4,429 lines)
 **What**: Stable code (rarely changed)
 **Contains**:
 - AIService (AI API calls)
@@ -200,15 +213,15 @@ main.js (7,210 lines total)
 
 | Feature | File | Line/Method |
 |---------|------|-------------|
-| **Skill Discovery Prompt** | src/services/SkillService.js | discoverSkillsFromJournal() ~line 168 |
-| **Skill Evolution Rules** | src/services/SkillService.js | checkSkillEvolution() ~line 174 |
-| **Skills Tab UI** | src/views/HeroView.js | renderSkills() ~line 42 |
-| **Discover Button** | src/views/HeroView.js | renderSkills() ~line 96 |
-| **AI Providers** | src/constants.js | AI_PROVIDERS ~line 10 |
-| **Skill Categories** | src/constants.js | SKILL_CATEGORIES ~line 102 |
-| **Character Tab** | src/views/HeroView.js | renderCharacter() ~line 169 |
-| **Elder AI Chat** | src/views/HeroView.js | renderElder() ~line 732 |
-| **Settings Tab** | main-core.js | LifeRPGSettingTab class |
+| **Skill Discovery Prompt** | dev/src/services/SkillService.js | discoverSkillsFromJournal() ~line 168 |
+| **Skill Evolution Rules** | dev/src/services/SkillService.js | checkSkillEvolution() ~line 174 |
+| **Skills Tab UI** | dev/src/views/HeroView.js | renderSkills() ~line 42 |
+| **Discover Button** | dev/src/views/HeroView.js | renderSkills() ~line 96 |
+| **AI Providers** | dev/src/constants.js | AI_PROVIDERS ~line 10 |
+| **Skill Categories** | dev/src/constants.js | SKILL_CATEGORIES ~line 102 |
+| **Character Tab** | dev/src/views/HeroView.js | renderCharacter() ~line 169 |
+| **Elder AI Chat** | dev/src/views/HeroView.js | renderElder() ~line 732 |
+| **Settings Tab** | dev/main-core.js | LifeRPGSettingTab class |
 
 ## 🎮 Features
 
@@ -248,7 +261,7 @@ main.js (7,210 lines total)
 ## 📈 Common Edits
 
 ### Add New Skill Category
-**File**: `src/constants.js` line ~145
+**File**: `dev/src/constants.js` line ~145
 ```javascript
 magic: {
     name: 'Magic Skills',
@@ -258,13 +271,13 @@ magic: {
 ```
 
 ### Change Evolution Level (5 → 3)
-**File**: `src/services/SkillService.js` line ~174
+**File**: `dev/src/services/SkillService.js` line ~174
 ```javascript
 if (skill.level < 3) return null;  // Was 5
 ```
 
 ### Modify Skills Tab
-**File**: `src/views/HeroView.js` line ~42
+**File**: `dev/src/views/HeroView.js` line ~42
 ```javascript
 renderSkills(container) {
     container.createEl('h3', { text: '⚡ Your Skills' });
@@ -273,7 +286,7 @@ renderSkills(container) {
 ```
 
 ### Add New AI Model
-**File**: `src/constants.js` line ~87
+**File**: `dev/src/constants.js` line ~87
 ```javascript
 openrouter: [
     { id: 'new/model-id', name: 'New Model', type: 'chat' },
@@ -309,6 +322,10 @@ npm run build
 - [x] Modular architecture setup
 - [x] Extract SkillService
 - [x] Extract HeroView
+- [x] Reorganize to /dev folder
+- [x] Clean repo structure
+- [ ] Create GitHub release v5.0.0
+- [ ] Submit to Obsidian community plugins
 - [ ] Test all features thoroughly
 - [ ] Add more evolution rules
 
@@ -340,9 +357,13 @@ npm run build
 
 ### Build Errors
 ```bash
-# Reinstall dependencies
+# Reinstall dependencies (from root)
+cd "/Users/buihuyhung/AIProject/LifeGame Plugin"
 rm -rf node_modules package-lock.json
 npm install
+
+# Build
+npm run build
 ```
 
 ### Plugin Not Loading Changes
@@ -368,16 +389,18 @@ npm install
 
 ### Recent Commits
 ```
+0b6bfb4 - Reorganize repo: Move development files to /dev folder
+f27a1a1 - Life RPG v5.0.0: Modular Architecture & Enhanced Skill System
 760b9c0 - Improve skill discovery from journal entries
-22c73b0 - Update AI model lists for all providers
-dd4c26b - Life RPG v5.0.0: Multi-Provider AI & Skill System
 ```
 
 ### Important Files to Commit
-- `src/` folder (all modules)
-- `build.js`, `package.json`
-- `main-core.js` (stable code)
-- Documentation (*.md files)
+- `dev/src/` folder (all modules)
+- `dev/build.js`, `dev/main-core.js`
+- `main.js` (built output in root)
+- `manifest.json`, `styles.css` (in root)
+- `package.json` (in root)
+- Documentation (*.md files in dev/)
 
 ### Don't Commit
 - `node_modules/` (in .gitignore)
@@ -387,31 +410,54 @@ dd4c26b - Life RPG v5.0.0: Multi-Provider AI & Skill System
 ## 🎯 For Next Claude Session
 
 **You'll want to know**:
-1. **Modular system is ACTIVE** - User edits files in `src/`
-2. **Build required** - Changes need `npm run build` to take effect
-3. **Watch mode available** - `npm run watch` for auto-rebuild
-4. **User actively develops** - Frequently adds features
-5. **Three extracted modules**: constants.js, SkillService.js, HeroView.js
-6. **Main-core.js is stable** - Rarely needs changes
+1. **Repository reorganized** - Dev files moved to `/dev` folder (Jan 29, 2026)
+2. **Root folder is clean** - Only plugin files (main.js, manifest.json, styles.css)
+3. **Modular system is ACTIVE** - Source in `dev/src/`
+4. **Build required** - Changes need `npm run build` from root
+5. **Watch mode available** - `npm run watch` for auto-rebuild
+6. **Plugin is RELEASE-READY** - Ready for Obsidian community submission
+7. **User actively develops** - Frequently adds features
+
+**Repository structure**:
+```
+Root (clean):
+├── main.js (308KB built output)
+├── manifest.json, styles.css
+└── dev/ (all development files)
+
+Dev folder:
+├── dev/src/constants.js
+├── dev/src/services/SkillService.js
+├── dev/src/views/HeroView.js
+└── dev/main-core.js
+```
 
 **Quick context**:
-- User wanted modular structure for easier development
+- v5.0.0 complete with modular architecture
 - Extracted high-change code (Skills, UI) from 7,321-line monolith
-- Build system combines modules → main.js → syncs to plugin folder
-- Everything works, user is actively developing
+- Build system: dev/build.js combines modules → main.js in root
+- Auto-syncs to .obsidian/plugins/life-rpg/main.js
+- Everything works, tested, ready for release
 
 **If user asks to**:
-- **Add feature** → Edit appropriate file in `src/`, then build
-- **Modify UI** → Edit `src/views/HeroView.js`
-- **Change skill logic** → Edit `src/services/SkillService.js`
-- **Add config** → Edit `src/constants.js`
+- **Add feature** → Edit `dev/src/*`, then `npm run build` from root
+- **Modify UI** → Edit `dev/src/views/HeroView.js`
+- **Change skill logic** → Edit `dev/src/services/SkillService.js`
+- **Add config** → Edit `dev/src/constants.js`
 - **Debug** → Check build output, Obsidian console
+- **Release** → Create GitHub release with main.js, manifest.json, styles.css
 
 **Common requests**:
-- "Add new skill category" → `src/constants.js`
-- "Change Skills tab" → `src/views/HeroView.js` renderSkills()
-- "Modify evolution" → `src/services/SkillService.js` checkSkillEvolution()
-- "Add new tab" → `src/views/HeroView.js` add to tabs array + render method
+- "Add new skill category" → `dev/src/constants.js`
+- "Change Skills tab" → `dev/src/views/HeroView.js` renderSkills()
+- "Modify evolution" → `dev/src/services/SkillService.js` checkSkillEvolution()
+- "Add new tab" → `dev/src/views/HeroView.js` add to tabs array + render method
+
+**Release workflow**:
+1. User creates GitHub release (tag: 5.0.0)
+2. Uploads: main.js, manifest.json, styles.css
+3. Submits to obsidianmd/obsidian-releases repo
+4. Waits for Obsidian team approval (~1-2 weeks)
 
 ## 📞 Quick Reference
 
@@ -425,9 +471,10 @@ npm run watch        # Auto-rebuild on save
 npm run dev          # Development mode
 
 # Check files
-ls -la src/          # View extracted modules
-wc -l main.js        # Check output size
+ls -la dev/src/      # View extracted modules
+wc -l main.js        # Check output size (should be ~7,268 lines)
 node -c main.js      # Check syntax
+ls -lh main.js       # Check file size (should be ~308KB)
 
 # Plugin location
 cd "/Users/buihuyhung/AIProject/.obsidian/plugins/life-rpg"
