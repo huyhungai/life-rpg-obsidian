@@ -8,13 +8,14 @@ Turn your life into an RPG! An Obsidian plugin that gamifies personal developmen
 
 ## What's New in v5.0.0
 
+- **Skill System** - AI discovers your skills from journal entries and levels them up
 - **Multi-Provider AI** - Choose from OpenRouter, OpenAI, Anthropic, or Google AI
 - **Journal Intelligence** - Analyze your journal entries to automatically affect character stats
 - **Semantic Search** - Search journals by meaning using AI embeddings
 - **Elder Memory** - The Elder recalls relevant past journal entries during conversations
 - **Elder Tab Redesign** - RPG-themed AI coach with customizable persona
 - **HUMAN 3.0 Framework** - Deep integration with development levels and quadrants
-- **Tab Reorganization** - Simplified from 11 to 7 intuitive tabs
+- **Tab Reorganization** - 8 intuitive tabs including new Skills tab
 
 ## Features
 
@@ -49,6 +50,20 @@ Analyze your journal entries to shape your character:
 - **AI-enhanced analysis** (with OpenRouter API)
 - **Semantic search** - Search journals by meaning, not just keywords
 - Configure journal folder or tag to scan
+
+### Skill System
+
+Develop skills as you progress through life:
+
+- **AI Skill Discovery** - AI reads your journal entries and discovers skills you're practicing
+- **Four Skill Categories**:
+  - 🧠 **Mind Skills**: Meditation, Critical Thinking, Emotional Intelligence, Memory
+  - 💪 **Body Skills**: Running, Strength Training, Yoga, Martial Arts
+  - ✨ **Spirit Skills**: Communication, Empathy, Leadership, Teaching
+  - ⚔️ **Vocation Skills**: Programming, Writing, Design, Finance
+- **Automatic Leveling** - Skills gain XP each time you mention practicing them
+- **Skill Points** - Earn skill points on character level up to manually boost skills
+- **Manual Addition** - Add skills manually if AI doesn't discover them
 
 ### Semantic Search & Elder Memory
 
@@ -110,6 +125,7 @@ A wise guide with deep knowledge of the HUMAN 3.0 framework:
 |-----|---------|
 | 📓 **Journal** | Sync and analyze journal entries |
 | 🎭 **Hero** | Character stats, domains, quadrants |
+| 🎯 **Skills** | Skill discovery and leveling |
 | 🧙 **Elder** | AI coach conversations |
 | ⚔️ **Quests** | Habits, quests, bad habits |
 | 🐉 **Arena** | Boss fights, dungeons |

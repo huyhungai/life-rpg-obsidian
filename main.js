@@ -83,19 +83,26 @@ const AI_PROVIDERS = {
     }
 };
 
-// Models by Provider
+// Models by Provider - Using exact model IDs from OpenRouter/providers
 const MODELS_BY_PROVIDER = {
     openrouter: [
-        { id: 'anthropic/claude-sonnet-4', name: 'Claude Sonnet 4 (Recommended)', type: 'chat' },
-        { id: 'anthropic/claude-opus-4', name: 'Claude Opus 4 (Most Capable)', type: 'chat' },
-        { id: 'anthropic/claude-haiku-3.5', name: 'Claude Haiku 3.5 (Fast)', type: 'chat' },
-        { id: 'openai/gpt-4o', name: 'GPT-4o', type: 'chat' },
-        { id: 'openai/gpt-4o-mini', name: 'GPT-4o Mini (Cheap)', type: 'chat' },
-        { id: 'google/gemini-2.0-flash-exp', name: 'Gemini 2.0 Flash', type: 'chat' },
-        { id: 'google/gemini-pro-1.5', name: 'Gemini Pro 1.5', type: 'chat' },
-        { id: 'deepseek/deepseek-chat', name: 'DeepSeek Chat (Budget)', type: 'chat' },
-        { id: 'x-ai/grok-2', name: 'Grok 2', type: 'chat' },
-        { id: 'qwen/qwen-2.5-72b-instruct', name: 'Qwen 2.5 72B', type: 'chat' },
+        // Anthropic via OpenRouter
+        { id: 'anthropic/claude-sonnet-4.5', name: 'Claude Sonnet 4.5 (Recommended)', type: 'chat' },
+        { id: 'anthropic/claude-opus-4.5', name: 'Claude Opus 4.5 (Most Capable)', type: 'chat' },
+        { id: 'anthropic/claude-haiku-4.5', name: 'Claude Haiku 4.5 (Fast & Cheap)', type: 'chat' },
+        // OpenAI via OpenRouter
+        { id: 'openai/gpt-5.2', name: 'GPT-5.2', type: 'chat' },
+        // Google via OpenRouter
+        { id: 'google/gemini-3-pro-preview', name: 'Gemini 3 Pro Preview', type: 'chat' },
+        { id: 'google/gemini-3-flash-preview', name: 'Gemini 3 Flash Preview (Fast)', type: 'chat' },
+        // Other providers via OpenRouter
+        { id: 'deepseek/deepseek-v3.2', name: 'DeepSeek V3.2 (Cheap)', type: 'chat' },
+        { id: 'x-ai/grok-4', name: 'Grok 4', type: 'chat' },
+        { id: 'qwen/qwen3-max', name: 'Qwen3 Max', type: 'chat' },
+        { id: 'qwen/qwen3-vl-32b-instruct', name: 'Qwen3 VL 32B (Vision)', type: 'chat' },
+        { id: 'moonshotai/kimi-k2.5', name: 'Kimi K2.5', type: 'chat' },
+        { id: 'zhipu/glm-4.7', name: 'GLM-4.7', type: 'chat' },
+        // Embedding models via OpenRouter
         { id: 'openai/text-embedding-3-small', name: 'Text Embedding 3 Small', type: 'embedding', dimensions: 1536 },
         { id: 'openai/text-embedding-3-large', name: 'Text Embedding 3 Large', type: 'embedding', dimensions: 3072 }
     ],
@@ -103,16 +110,14 @@ const MODELS_BY_PROVIDER = {
         { id: 'gpt-4o', name: 'GPT-4o (Recommended)', type: 'chat' },
         { id: 'gpt-4o-mini', name: 'GPT-4o Mini (Fast & Cheap)', type: 'chat' },
         { id: 'gpt-4-turbo', name: 'GPT-4 Turbo', type: 'chat' },
-        { id: 'gpt-3.5-turbo', name: 'GPT-3.5 Turbo (Budget)', type: 'chat' },
+        { id: 'o1-preview', name: 'o1 Preview (Reasoning)', type: 'chat' },
         { id: 'text-embedding-3-small', name: 'Text Embedding 3 Small', type: 'embedding', dimensions: 1536 },
-        { id: 'text-embedding-3-large', name: 'Text Embedding 3 Large', type: 'embedding', dimensions: 3072 },
-        { id: 'text-embedding-ada-002', name: 'Text Embedding Ada 002', type: 'embedding', dimensions: 1536 }
+        { id: 'text-embedding-3-large', name: 'Text Embedding 3 Large', type: 'embedding', dimensions: 3072 }
     ],
     anthropic: [
         { id: 'claude-sonnet-4-20250514', name: 'Claude Sonnet 4 (Recommended)', type: 'chat' },
         { id: 'claude-opus-4-20250514', name: 'Claude Opus 4 (Most Capable)', type: 'chat' },
-        { id: 'claude-3-5-haiku-20241022', name: 'Claude 3.5 Haiku (Fast)', type: 'chat' },
-        { id: 'claude-3-5-sonnet-20241022', name: 'Claude 3.5 Sonnet', type: 'chat' }
+        { id: 'claude-3-5-haiku-20241022', name: 'Claude 3.5 Haiku (Fast)', type: 'chat' }
     ],
     google: [
         { id: 'gemini-2.0-flash-exp', name: 'Gemini 2.0 Flash (Recommended)', type: 'chat' },
@@ -120,6 +125,67 @@ const MODELS_BY_PROVIDER = {
         { id: 'gemini-1.5-flash', name: 'Gemini 1.5 Flash (Fast)', type: 'chat' },
         { id: 'text-embedding-004', name: 'Text Embedding 004', type: 'embedding', dimensions: 768 }
     ]
+};
+
+// ============================================================================
+// SKILL SYSTEM CONFIGURATION
+// ============================================================================
+
+// Predefined skill categories mapped to life domains
+const SKILL_CATEGORIES = {
+    // Mind Quadrant
+    mind: {
+        name: 'Mind Skills',
+        icon: '🧠',
+        examples: ['Meditation', 'Critical Thinking', 'Emotional Intelligence', 'Memory', 'Focus', 'Problem Solving', 'Creativity', 'Self-Awareness']
+    },
+    // Body Quadrant
+    body: {
+        name: 'Body Skills',
+        icon: '💪',
+        examples: ['Running', 'Strength Training', 'Yoga', 'Swimming', 'Martial Arts', 'Dancing', 'Cooking', 'Sleep Optimization']
+    },
+    // Spirit Quadrant
+    spirit: {
+        name: 'Spirit Skills',
+        icon: '✨',
+        examples: ['Communication', 'Empathy', 'Leadership', 'Networking', 'Teaching', 'Volunteering', 'Environmental Awareness', 'Cultural Appreciation']
+    },
+    // Vocation Quadrant
+    vocation: {
+        name: 'Vocation Skills',
+        icon: '⚔️',
+        examples: ['Programming', 'Writing', 'Design', 'Photography', 'Marketing', 'Finance', 'Project Management', 'Public Speaking']
+    }
+};
+
+// Default skill structure
+const DEFAULT_SKILL = {
+    id: '',
+    name: '',
+    category: 'vocation', // mind, body, spirit, vocation
+    level: 1,
+    xp: 0,
+    xpToNextLevel: 100,
+    description: '',
+    discoveredFrom: '', // 'journal', 'manual', 'level_up'
+    discoveredDate: null,
+    lastPracticed: null,
+    totalPracticeCount: 0
+};
+
+// XP required for each skill level (exponential growth)
+function getSkillXpRequired(level) {
+    return Math.floor(100 * Math.pow(1.5, level - 1));
+}
+
+// Default skills settings
+const DEFAULT_SKILLS_SETTINGS = {
+    skills: [],
+    autoDiscovery: true, // AI discovers skills from journal
+    skillPointsPerLevel: 1, // Skill points earned per character level
+    availableSkillPoints: 0,
+    totalSkillsDiscovered: 0
 };
 
 // Helper to get chat models for a provider
@@ -1640,6 +1706,239 @@ class EmbeddingService {
 }
 
 // ============================================================================
+// SKILL SERVICE CLASS - Skill Discovery & Leveling
+// ============================================================================
+
+class SkillService {
+    constructor(plugin) {
+        this.plugin = plugin;
+    }
+
+    // Initialize skills settings if not present
+    ensureSkillsSettings() {
+        if (!this.plugin.settings.skillsSettings) {
+            this.plugin.settings.skillsSettings = JSON.parse(JSON.stringify(DEFAULT_SKILLS_SETTINGS));
+        }
+        if (!this.plugin.settings.skillsSettings.skills) {
+            this.plugin.settings.skillsSettings.skills = [];
+        }
+    }
+
+    // Get all skills
+    getSkills() {
+        this.ensureSkillsSettings();
+        return this.plugin.settings.skillsSettings.skills;
+    }
+
+    // Get skill by ID
+    getSkill(skillId) {
+        return this.getSkills().find(s => s.id === skillId);
+    }
+
+    // Get skills by category
+    getSkillsByCategory(category) {
+        return this.getSkills().filter(s => s.category === category);
+    }
+
+    // Create a new skill
+    createSkill(name, category, discoveredFrom = 'manual', description = '') {
+        this.ensureSkillsSettings();
+
+        // Check if skill already exists
+        const existingSkill = this.getSkills().find(s =>
+            s.name.toLowerCase() === name.toLowerCase()
+        );
+        if (existingSkill) {
+            return existingSkill;
+        }
+
+        const newSkill = {
+            ...JSON.parse(JSON.stringify(DEFAULT_SKILL)),
+            id: `skill_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+            name: name,
+            category: category,
+            description: description,
+            discoveredFrom: discoveredFrom,
+            discoveredDate: new Date().toISOString(),
+            xpToNextLevel: getSkillXpRequired(1)
+        };
+
+        this.plugin.settings.skillsSettings.skills.push(newSkill);
+        this.plugin.settings.skillsSettings.totalSkillsDiscovered++;
+
+        return newSkill;
+    }
+
+    // Add XP to a skill
+    addSkillXp(skillId, xpAmount) {
+        const skill = this.getSkill(skillId);
+        if (!skill) return null;
+
+        skill.xp += xpAmount;
+        skill.lastPracticed = new Date().toISOString();
+        skill.totalPracticeCount++;
+
+        // Check for level up
+        let levelsGained = 0;
+        while (skill.xp >= skill.xpToNextLevel) {
+            skill.xp -= skill.xpToNextLevel;
+            skill.level++;
+            skill.xpToNextLevel = getSkillXpRequired(skill.level);
+            levelsGained++;
+        }
+
+        return { skill, levelsGained };
+    }
+
+    // Level up a skill using skill points
+    levelUpSkill(skillId) {
+        this.ensureSkillsSettings();
+        const ss = this.plugin.settings.skillsSettings;
+
+        if (ss.availableSkillPoints <= 0) {
+            return { success: false, message: 'No skill points available' };
+        }
+
+        const skill = this.getSkill(skillId);
+        if (!skill) {
+            return { success: false, message: 'Skill not found' };
+        }
+
+        // Use skill point to level up
+        ss.availableSkillPoints--;
+        skill.level++;
+        skill.xp = 0;
+        skill.xpToNextLevel = getSkillXpRequired(skill.level);
+
+        return { success: true, skill };
+    }
+
+    // AI discovers skills from journal content
+    async discoverSkillsFromJournal(content, fileName) {
+        const apiKey = getActiveApiKey(this.plugin.settings);
+        if (!apiKey) return [];
+
+        const aiService = new AIService(this.plugin);
+
+        const prompt = `Analyze this journal entry and identify any skills the person is practicing, learning, or developing.
+
+For each skill found, determine:
+1. The skill name (be specific, e.g., "Python Programming" not just "Programming")
+2. The category: "mind" (mental/emotional skills), "body" (physical skills), "spirit" (social/connection skills), or "vocation" (career/craft skills)
+3. A brief description
+4. Estimated XP to award based on practice intensity (5-50)
+
+Journal entry from "${fileName}":
+${content.substring(0, 3000)}
+
+Return ONLY a JSON array (no other text):
+[
+  {"name": "Skill Name", "category": "vocation", "description": "Brief description", "xp": 20},
+  ...
+]
+
+If no skills are mentioned, return an empty array: []`;
+
+        try {
+            const response = await aiService.callProvider(
+                [{ role: 'user', content: prompt }],
+                this.plugin.settings.ai?.provider || 'openrouter',
+                apiKey,
+                getActiveChatModel(this.plugin.settings),
+                0.3, // Low temperature for consistent parsing
+                500
+            );
+
+            // Parse JSON from response
+            let jsonStr = response;
+            if (response.includes('```')) {
+                const match = response.match(/```(?:json)?\s*([\s\S]*?)```/);
+                if (match) jsonStr = match[1];
+            }
+
+            const discoveredSkills = JSON.parse(jsonStr.trim());
+            return Array.isArray(discoveredSkills) ? discoveredSkills : [];
+        } catch (error) {
+            console.error('Skill discovery error:', error);
+            return [];
+        }
+    }
+
+    // Process discovered skills - create or update
+    async processDiscoveredSkills(discoveredSkills) {
+        const results = [];
+
+        for (const discovered of discoveredSkills) {
+            if (!discovered.name || !discovered.category) continue;
+
+            // Find existing skill or create new
+            let skill = this.getSkills().find(s =>
+                s.name.toLowerCase() === discovered.name.toLowerCase()
+            );
+
+            if (skill) {
+                // Existing skill - add XP
+                const result = this.addSkillXp(skill.id, discovered.xp || 10);
+                results.push({
+                    action: 'xp_added',
+                    skill: result.skill,
+                    xpAdded: discovered.xp || 10,
+                    levelsGained: result.levelsGained
+                });
+            } else {
+                // New skill discovered
+                skill = this.createSkill(
+                    discovered.name,
+                    discovered.category,
+                    'journal',
+                    discovered.description || ''
+                );
+                // Add initial XP
+                if (discovered.xp > 0) {
+                    this.addSkillXp(skill.id, discovered.xp);
+                }
+                results.push({
+                    action: 'discovered',
+                    skill: skill,
+                    xpAdded: discovered.xp || 0
+                });
+            }
+        }
+
+        return results;
+    }
+
+    // Get skill summary for display
+    getSkillSummary() {
+        const skills = this.getSkills();
+        const summary = {
+            total: skills.length,
+            byCategory: {},
+            topSkills: [],
+            recentlyPracticed: []
+        };
+
+        // Count by category
+        Object.keys(SKILL_CATEGORIES).forEach(cat => {
+            summary.byCategory[cat] = skills.filter(s => s.category === cat).length;
+        });
+
+        // Top skills by level
+        summary.topSkills = [...skills]
+            .sort((a, b) => b.level - a.level || b.xp - a.xp)
+            .slice(0, 5);
+
+        // Recently practiced
+        summary.recentlyPracticed = [...skills]
+            .filter(s => s.lastPracticed)
+            .sort((a, b) => new Date(b.lastPracticed) - new Date(a.lastPracticed))
+            .slice(0, 5);
+
+        return summary;
+    }
+}
+
+// ============================================================================
 // JOURNAL ANALYZER CLASS
 // ============================================================================
 
@@ -2676,6 +2975,7 @@ class HeroView extends ItemView {
         const tabs = [
             { id: 'journal', label: '📓 Journal' },
             { id: 'character', label: '🎭 Hero' },
+            { id: 'skills', label: '🎯 Skills' },
             { id: 'elder', label: '🧙 Elder' },
             { id: 'quests', label: '⚔️ Quests' },
             { id: 'arena', label: '🐉 Arena' },
@@ -2696,11 +2996,142 @@ class HeroView extends ItemView {
 
         if (this.activeTab === 'journal') this.renderJournal(tabContent);
         else if (this.activeTab === 'character') this.renderCharacter(tabContent);
+        else if (this.activeTab === 'skills') this.renderSkills(tabContent);
         else if (this.activeTab === 'elder') this.renderElder(tabContent);
         else if (this.activeTab === 'quests') this.renderQuestsHub(tabContent);
         else if (this.activeTab === 'arena') this.renderArena(tabContent);
         else if (this.activeTab === 'tavern') this.renderTavern(tabContent);
         else if (this.activeTab === 'log') this.renderActivityLog(tabContent);
+    }
+
+    // ============================================================================
+    // SKILLS TAB - Character Skills & Abilities
+    // ============================================================================
+    renderSkills(container) {
+        const s = this.plugin.settings;
+        const skillService = new SkillService(this.plugin);
+        const skills = skillService.getSkills();
+        const ss = s.skillsSettings || {};
+
+        container.createEl('h3', { text: '🎯 Character Skills' });
+
+        // Skill Points Banner
+        const skillPointsBanner = container.createDiv({ cls: 'rpg-skill-points-banner' });
+        skillPointsBanner.innerHTML = `
+            <div class="rpg-skill-points-icon">⭐</div>
+            <div class="rpg-skill-points-info">
+                <div class="rpg-skill-points-count">${ss.availableSkillPoints || 0}</div>
+                <div class="rpg-skill-points-label">Skill Points Available</div>
+            </div>
+            <div class="rpg-skill-points-hint">Level up to earn more points</div>
+        `;
+
+        // Skills Summary
+        const summary = skillService.getSkillSummary();
+        const summaryCard = container.createDiv({ cls: 'rpg-skills-summary' });
+        summaryCard.innerHTML = `
+            <div class="rpg-skills-stat">
+                <span class="rpg-skills-stat-value">${summary.total}</span>
+                <span class="rpg-skills-stat-label">Total Skills</span>
+            </div>
+            <div class="rpg-skills-stat">
+                <span class="rpg-skills-stat-value">${summary.byCategory.mind || 0}</span>
+                <span class="rpg-skills-stat-label">🧠 Mind</span>
+            </div>
+            <div class="rpg-skills-stat">
+                <span class="rpg-skills-stat-value">${summary.byCategory.body || 0}</span>
+                <span class="rpg-skills-stat-label">💪 Body</span>
+            </div>
+            <div class="rpg-skills-stat">
+                <span class="rpg-skills-stat-value">${summary.byCategory.spirit || 0}</span>
+                <span class="rpg-skills-stat-label">✨ Spirit</span>
+            </div>
+            <div class="rpg-skills-stat">
+                <span class="rpg-skills-stat-value">${summary.byCategory.vocation || 0}</span>
+                <span class="rpg-skills-stat-label">⚔️ Vocation</span>
+            </div>
+        `;
+
+        // Add Skill Button
+        const addSkillBtn = container.createEl('button', {
+            text: '➕ Add New Skill',
+            cls: 'rpg-full-width-btn secondary'
+        });
+        addSkillBtn.onclick = () => {
+            new AddSkillModal(this.app, this.plugin, () => this.render()).open();
+        };
+
+        // Skills by Category
+        Object.entries(SKILL_CATEGORIES).forEach(([catId, catInfo]) => {
+            const categorySkills = skills.filter(s => s.category === catId);
+
+            const categorySection = container.createDiv({ cls: 'rpg-skill-category' });
+            const categoryHeader = categorySection.createDiv({ cls: 'rpg-skill-category-header' });
+            categoryHeader.innerHTML = `
+                <span class="rpg-skill-category-icon">${catInfo.icon}</span>
+                <span class="rpg-skill-category-name">${catInfo.name}</span>
+                <span class="rpg-skill-category-count">${categorySkills.length}</span>
+            `;
+
+            if (categorySkills.length === 0) {
+                const emptyMsg = categorySection.createDiv({ cls: 'rpg-skill-empty' });
+                emptyMsg.textContent = `No ${catInfo.name.toLowerCase()} discovered yet`;
+                const examplesMsg = categorySection.createDiv({ cls: 'rpg-skill-examples' });
+                examplesMsg.textContent = `Examples: ${catInfo.examples.slice(0, 4).join(', ')}...`;
+            } else {
+                const skillsList = categorySection.createDiv({ cls: 'rpg-skills-list' });
+
+                categorySkills.forEach(skill => {
+                    const skillCard = skillsList.createDiv({ cls: 'rpg-skill-card' });
+
+                    const xpPercent = Math.round((skill.xp / skill.xpToNextLevel) * 100);
+
+                    skillCard.innerHTML = `
+                        <div class="rpg-skill-header">
+                            <span class="rpg-skill-name">${skill.name}</span>
+                            <span class="rpg-skill-level">Lv. ${skill.level}</span>
+                        </div>
+                        <div class="rpg-skill-bar">
+                            <div class="rpg-skill-bar-fill" style="width: ${xpPercent}%"></div>
+                        </div>
+                        <div class="rpg-skill-meta">
+                            <span class="rpg-skill-xp">${skill.xp}/${skill.xpToNextLevel} XP</span>
+                            ${skill.discoveredFrom === 'journal' ? '<span class="rpg-skill-badge">📓 Journal</span>' : ''}
+                        </div>
+                    `;
+
+                    // Add level up button if skill points available
+                    if ((ss.availableSkillPoints || 0) > 0) {
+                        const levelUpBtn = skillCard.createEl('button', {
+                            text: '⬆️ Level Up (1 SP)',
+                            cls: 'rpg-skill-levelup-btn'
+                        });
+                        levelUpBtn.onclick = async () => {
+                            const result = skillService.levelUpSkill(skill.id);
+                            if (result.success) {
+                                new Notice(`🎯 ${skill.name} leveled up to ${result.skill.level}!`);
+                                await this.plugin.saveSettings();
+                                this.render();
+                            } else {
+                                new Notice(result.message);
+                            }
+                        };
+                    }
+                });
+            }
+        });
+
+        // Tips Section
+        const tipsBox = container.createDiv({ cls: 'rpg-skill-tips' });
+        tipsBox.innerHTML = `
+            <h4>💡 How Skills Work</h4>
+            <ul>
+                <li><strong>Discover skills</strong> by writing about them in your journal</li>
+                <li><strong>Gain skill XP</strong> each time you mention practicing a skill</li>
+                <li><strong>Level up</strong> skills automatically or use Skill Points</li>
+                <li><strong>Earn Skill Points</strong> when your character levels up</li>
+            </ul>
+        `;
     }
 
     renderCharacter(container) {
@@ -5008,6 +5439,88 @@ class NewBossFightModal extends Modal {
 }
 
 // ============================================================================
+// ADD SKILL MODAL
+// ============================================================================
+class AddSkillModal extends Modal {
+    constructor(app, plugin, onSubmit) {
+        super(app);
+        this.plugin = plugin;
+        this.onSubmit = onSubmit;
+    }
+
+    onOpen() {
+        const { contentEl } = this;
+        contentEl.addClass('rpg-add-skill-modal');
+
+        contentEl.createEl('h2', { text: '🎯 Add New Skill' });
+
+        let name = '';
+        let category = 'vocation';
+        let description = '';
+
+        new Setting(contentEl)
+            .setName('Skill Name')
+            .setDesc('What skill are you developing?')
+            .addText(text => text
+                .setPlaceholder('e.g., Python Programming')
+                .onChange(value => name = value));
+
+        new Setting(contentEl)
+            .setName('Category')
+            .setDesc('Which quadrant does this skill belong to?')
+            .addDropdown(dd => {
+                Object.entries(SKILL_CATEGORIES).forEach(([id, info]) => {
+                    dd.addOption(id, `${info.icon} ${info.name}`);
+                });
+                dd.setValue('vocation');
+                dd.onChange(value => category = value);
+            });
+
+        new Setting(contentEl)
+            .setName('Description')
+            .setDesc('Optional description of this skill')
+            .addTextArea(text => text
+                .setPlaceholder('What does this skill involve?')
+                .onChange(value => description = value));
+
+        // Examples section
+        const examplesDiv = contentEl.createDiv({ cls: 'rpg-skill-examples-section' });
+        examplesDiv.createEl('h4', { text: '💡 Example Skills by Category' });
+
+        Object.entries(SKILL_CATEGORIES).forEach(([id, info]) => {
+            const catDiv = examplesDiv.createDiv({ cls: 'rpg-skill-example-cat' });
+            catDiv.innerHTML = `<strong>${info.icon} ${info.name}:</strong> ${info.examples.join(', ')}`;
+        });
+
+        new Setting(contentEl)
+            .addButton(btn => btn
+                .setButtonText('Cancel')
+                .onClick(() => this.close()))
+            .addButton(btn => btn
+                .setButtonText('Add Skill')
+                .setCta()
+                .onClick(async () => {
+                    if (!name.trim()) {
+                        new Notice('Please enter a skill name');
+                        return;
+                    }
+
+                    const skillService = new SkillService(this.plugin);
+                    const skill = skillService.createSkill(name.trim(), category, 'manual', description.trim());
+
+                    this.plugin.logActivity('skill_added', `Added skill: ${skill.name}`, { category });
+
+                    await this.plugin.saveSettings();
+                    new Notice(`🎯 Skill added: ${skill.name}`);
+                    this.onSubmit();
+                    this.close();
+                }));
+    }
+
+    onClose() { this.contentEl.empty(); }
+}
+
+// ============================================================================
 // NPC DIALOG MODAL
 // ============================================================================
 class NPCDialogModal extends Modal {
@@ -5872,20 +6385,27 @@ module.exports = class LifeRPG extends Plugin {
         s.maxHp += 10;
         s.hp = s.maxHp;
 
+        // Grant skill points on level up
+        if (!s.skillsSettings) {
+            s.skillsSettings = JSON.parse(JSON.stringify(DEFAULT_SKILLS_SETTINGS));
+        }
+        const skillPointsGained = s.skillsSettings.skillPointsPerLevel || 1;
+        s.skillsSettings.availableSkillPoints = (s.skillsSettings.availableSkillPoints || 0) + skillPointsGained;
+
         // Check for HUMAN tier advancement
         const oldDevLevel = getDevelopmentLevel(oldLevel);
         const newDevLevel = getDevelopmentLevel(s.level);
 
         // Log activity
-        this.logActivity('level_up', `Reached Level ${s.level}!`, { newLevel: s.level, devLevel: newDevLevel });
+        this.logActivity('level_up', `Reached Level ${s.level}!`, { newLevel: s.level, devLevel: newDevLevel, skillPointsGained });
 
         if (oldDevLevel !== newDevLevel) {
             // HUMAN tier advancement!
             const devInfo = DEVELOPMENT_LEVELS[newDevLevel];
-            new Notice(`🌟 HUMAN ${newDevLevel} UNLOCKED! 🌟\n${devInfo.icon} ${devInfo.name} - ${devInfo.journey}`, 10000);
+            new Notice(`🌟 HUMAN ${newDevLevel} UNLOCKED! 🌟\n${devInfo.icon} ${devInfo.name} - ${devInfo.journey}\n+${skillPointsGained} Skill Point!`, 10000);
             this.logActivity('tier_up', `Advanced to HUMAN ${newDevLevel} - ${devInfo.name}!`, { tier: newDevLevel });
         } else {
-            new Notice(`🎉 LEVEL UP! You are now Level ${s.level}!`);
+            new Notice(`🎉 LEVEL UP! You are now Level ${s.level}!\n+${skillPointsGained} Skill Point`);
         }
 
         this.checkAchievements();
@@ -6363,6 +6883,42 @@ module.exports = class LifeRPG extends Plugin {
             }
         }
 
+        // Skill Discovery from journals (if enabled and API key available)
+        let skillsDiscovered = 0;
+        let skillsLeveledUp = 0;
+        const apiKey = getActiveApiKey(this.settings);
+
+        if (this.settings.skillsSettings?.autoDiscovery && apiKey) {
+            const skillService = new SkillService(this);
+
+            for (const note of newNotes) {
+                try {
+                    const content = await this.app.vault.read(note);
+                    const discovered = await skillService.discoverSkillsFromJournal(content, note.basename);
+
+                    if (discovered.length > 0) {
+                        const results = await skillService.processDiscoveredSkills(discovered);
+
+                        for (const result of results) {
+                            if (result.action === 'discovered') {
+                                skillsDiscovered++;
+                                this.logActivity('skill_discovered', `Discovered skill: ${result.skill.name}`, {
+                                    category: result.skill.category
+                                });
+                            } else if (result.levelsGained > 0) {
+                                skillsLeveledUp += result.levelsGained;
+                                this.logActivity('skill_levelup', `${result.skill.name} leveled up!`, {
+                                    newLevel: result.skill.level
+                                });
+                            }
+                        }
+                    }
+                } catch (skillErr) {
+                    console.log(`Skill discovery skipped for ${note.basename}:`, skillErr.message);
+                }
+            }
+        }
+
         // Update journal settings
         js.lastSyncDate = new Date().toISOString();
         js.recentAnalysis = recentAnalysis.slice(0, 10); // Keep last 10
@@ -6370,9 +6926,13 @@ module.exports = class LifeRPG extends Plugin {
         await this.saveSettings();
         this.refreshViews();
 
-        // Show summary
+        // Show summary with skills info
         const hpText = totalHPChange >= 0 ? `+${totalHPChange}` : totalHPChange;
-        new Notice(`📓 Journal Sync Complete!\n+${totalXP} XP, +${totalGold} Gold\nHP: ${hpText}`);
+        let summary = `📓 Journal Sync Complete!\n+${totalXP} XP, +${totalGold} Gold\nHP: ${hpText}`;
+        if (skillsDiscovered > 0 || skillsLeveledUp > 0) {
+            summary += `\n🎯 Skills: ${skillsDiscovered > 0 ? `+${skillsDiscovered} new` : ''}${skillsDiscovered > 0 && skillsLeveledUp > 0 ? ', ' : ''}${skillsLeveledUp > 0 ? `${skillsLeveledUp} level ups` : ''}`;
+        }
+        new Notice(summary);
     }
 
     checkAchievements() {

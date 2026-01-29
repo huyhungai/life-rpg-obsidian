@@ -3979,3 +3979,247 @@
     border-left: 3px solid var(--rpg-gold-color);
     font-size: 0.9em;
 }
+
+/* ============================================================================
+   SKILLS TAB STYLES
+   ============================================================================ */
+
+.rpg-skill-points-banner {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    padding: 15px 20px;
+    background: linear-gradient(135deg, rgba(170, 85, 255, 0.15), rgba(85, 170, 255, 0.15));
+    border-radius: 12px;
+    margin-bottom: 20px;
+    border: 1px solid rgba(170, 85, 255, 0.3);
+}
+
+.rpg-skill-points-icon {
+    font-size: 2em;
+}
+
+.rpg-skill-points-info {
+    flex: 1;
+}
+
+.rpg-skill-points-count {
+    font-size: 2em;
+    font-weight: bold;
+    color: var(--rpg-skill-color);
+}
+
+.rpg-skill-points-label {
+    font-size: 0.9em;
+    color: var(--text-muted);
+}
+
+.rpg-skill-points-hint {
+    font-size: 0.85em;
+    color: var(--text-faint);
+    font-style: italic;
+}
+
+.rpg-skills-summary {
+    display: flex;
+    justify-content: space-between;
+    gap: 10px;
+    margin-bottom: 20px;
+}
+
+.rpg-skills-stat {
+    flex: 1;
+    text-align: center;
+    padding: 12px 8px;
+    background: var(--background-secondary);
+    border-radius: 8px;
+}
+
+.rpg-skills-stat-value {
+    display: block;
+    font-size: 1.5em;
+    font-weight: bold;
+    color: var(--text-normal);
+}
+
+.rpg-skills-stat-label {
+    font-size: 0.75em;
+    color: var(--text-muted);
+}
+
+.rpg-skill-category {
+    margin-bottom: 20px;
+}
+
+.rpg-skill-category-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 0;
+    border-bottom: 1px solid var(--background-modifier-border);
+    margin-bottom: 10px;
+}
+
+.rpg-skill-category-icon {
+    font-size: 1.2em;
+}
+
+.rpg-skill-category-name {
+    font-weight: 600;
+    flex: 1;
+}
+
+.rpg-skill-category-count {
+    background: var(--background-modifier-border);
+    padding: 2px 8px;
+    border-radius: 10px;
+    font-size: 0.85em;
+    color: var(--text-muted);
+}
+
+.rpg-skill-empty {
+    color: var(--text-faint);
+    font-style: italic;
+    padding: 10px;
+}
+
+.rpg-skill-examples {
+    font-size: 0.85em;
+    color: var(--text-muted);
+    padding: 0 10px 10px;
+}
+
+.rpg-skills-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.rpg-skill-card {
+    background: var(--background-primary-alt);
+    border: 1px solid var(--background-modifier-border);
+    border-radius: 8px;
+    padding: 12px 15px;
+    transition: border-color 0.2s;
+}
+
+.rpg-skill-card:hover {
+    border-color: var(--interactive-accent);
+}
+
+.rpg-skill-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
+}
+
+.rpg-skill-name {
+    font-weight: 600;
+    color: var(--text-normal);
+}
+
+.rpg-skill-level {
+    background: var(--rpg-skill-color);
+    color: white;
+    padding: 2px 10px;
+    border-radius: 12px;
+    font-size: 0.85em;
+    font-weight: bold;
+}
+
+.rpg-skill-bar {
+    height: 6px;
+    background: var(--background-modifier-border);
+    border-radius: 3px;
+    overflow: hidden;
+    margin-bottom: 8px;
+}
+
+.rpg-skill-bar-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--rpg-skill-color), #cc88ff);
+    border-radius: 3px;
+    transition: width 0.3s ease;
+}
+
+.rpg-skill-meta {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.rpg-skill-xp {
+    font-size: 0.85em;
+    color: var(--text-muted);
+}
+
+.rpg-skill-badge {
+    font-size: 0.75em;
+    background: rgba(155, 89, 182, 0.2);
+    color: var(--rpg-skill-color);
+    padding: 2px 8px;
+    border-radius: 8px;
+}
+
+.rpg-skill-levelup-btn {
+    width: 100%;
+    margin-top: 8px;
+    padding: 6px 12px;
+    background: var(--rpg-skill-color);
+    color: white;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 0.85em;
+    transition: background 0.2s;
+}
+
+.rpg-skill-levelup-btn:hover {
+    background: #8844dd;
+}
+
+.rpg-skill-tips {
+    background: var(--background-secondary);
+    padding: 15px;
+    border-radius: 8px;
+    margin-top: 20px;
+}
+
+.rpg-skill-tips h4 {
+    margin: 0 0 10px 0;
+}
+
+.rpg-skill-tips ul {
+    margin: 0;
+    padding-left: 20px;
+}
+
+.rpg-skill-tips li {
+    margin-bottom: 5px;
+    color: var(--text-muted);
+    font-size: 0.9em;
+}
+
+/* Add Skill Modal */
+.rpg-add-skill-modal {
+    padding: 10px;
+}
+
+.rpg-skill-examples-section {
+    background: var(--background-secondary);
+    padding: 15px;
+    border-radius: 8px;
+    margin: 15px 0;
+}
+
+.rpg-skill-examples-section h4 {
+    margin: 0 0 10px 0;
+    font-size: 0.95em;
+}
+
+.rpg-skill-example-cat {
+    font-size: 0.85em;
+    color: var(--text-muted);
+    margin-bottom: 5px;
+}
