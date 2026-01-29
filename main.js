@@ -39,7 +39,7 @@ const AVAILABLE_MODELS = [
     { id: 'google/gemini-3-pro-preview', name: 'Gemini 3 Pro Preview', provider: 'Google' },
     { id: 'google/gemini-3-flash-preview', name: 'Gemini 3 Flash Preview (Fast)', provider: 'Google' },
     { id: 'deepseek/deepseek-v3.2', name: 'DeepSeek V3.2 (Cheap)', provider: 'DeepSeek' },
-    { id: 'x-ai/grok-4.1-fast', name: 'Grok 4.1 Fast', provider: 'xAI' },
+    { id: 'x-ai/grok-4', name: 'Grok 4', provider: 'xAI' },
     { id: 'qwen/qwen3-max', name: 'Qwen3 Max', provider: 'Alibaba' },
     { id: 'qwen/qwen3-vl-32b-instruct', name: 'Qwen3 VL 32B (Vision)', provider: 'Alibaba' },
     { id: 'moonshotai/kimi-k2.5', name: 'Kimi K2.5', provider: 'Moonshot' },

@@ -146,7 +146,7 @@ The Elder and Journal AI features require an OpenRouter API key:
 | **Google** | Gemini 3 Pro Preview | High quality |
 | **Google** | Gemini 3 Flash Preview | Fast (Default) |
 | **DeepSeek** | DeepSeek V3.2 | Budget-friendly |
-| **xAI** | Grok 4.1 Fast | Fast responses |
+| **xAI** | Grok 4 | Latest Grok |
 | **Alibaba** | Qwen3 Max | Powerful |
 | **Alibaba** | Qwen3 VL 32B | Vision support |
 | **Moonshot** | Kimi K2.5 | Chinese-optimized |
