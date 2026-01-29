@@ -92,6 +92,8 @@ const MODELS_BY_PROVIDER = {
         { id: 'anthropic/claude-haiku-4.5', name: 'Claude Haiku 4.5 (Fast & Cheap)', type: 'chat' },
         // OpenAI via OpenRouter
         { id: 'openai/gpt-5.2', name: 'GPT-5.2', type: 'chat' },
+        { id: 'openai/gpt-5-mini', name: 'GPT-5 Mini', type: 'chat' },
+        { id: 'openai/gpt-5-nano', name: 'GPT-5 Nano (Fast & Cheap)', type: 'chat' },
         // Google via OpenRouter
         { id: 'google/gemini-3-pro-preview', name: 'Gemini 3 Pro Preview', type: 'chat' },
         { id: 'google/gemini-3-flash-preview', name: 'Gemini 3 Flash Preview (Fast)', type: 'chat' },
@@ -107,22 +109,20 @@ const MODELS_BY_PROVIDER = {
         { id: 'openai/text-embedding-3-large', name: 'Text Embedding 3 Large', type: 'embedding', dimensions: 3072 }
     ],
     openai: [
-        { id: 'gpt-4o', name: 'GPT-4o (Recommended)', type: 'chat' },
-        { id: 'gpt-4o-mini', name: 'GPT-4o Mini (Fast & Cheap)', type: 'chat' },
-        { id: 'gpt-4-turbo', name: 'GPT-4 Turbo', type: 'chat' },
-        { id: 'o1-preview', name: 'o1 Preview (Reasoning)', type: 'chat' },
+        { id: 'gpt-5.2-2025-12-11', name: 'GPT-5.2 (Recommended)', type: 'chat' },
+        { id: 'gpt-5-mini-2025-08-07', name: 'GPT-5 Mini', type: 'chat' },
+        { id: 'gpt-5-nano-2025-08-07', name: 'GPT-5 Nano (Fast & Cheap)', type: 'chat' },
         { id: 'text-embedding-3-small', name: 'Text Embedding 3 Small', type: 'embedding', dimensions: 1536 },
         { id: 'text-embedding-3-large', name: 'Text Embedding 3 Large', type: 'embedding', dimensions: 3072 }
     ],
     anthropic: [
-        { id: 'claude-sonnet-4-20250514', name: 'Claude Sonnet 4 (Recommended)', type: 'chat' },
-        { id: 'claude-opus-4-20250514', name: 'Claude Opus 4 (Most Capable)', type: 'chat' },
-        { id: 'claude-3-5-haiku-20241022', name: 'Claude 3.5 Haiku (Fast)', type: 'chat' }
+        { id: 'claude-sonnet-4-5', name: 'Claude Sonnet 4.5 (Recommended)', type: 'chat' },
+        { id: 'claude-opus-4-5-20251101', name: 'Claude Opus 4.5 (Most Capable)', type: 'chat' },
+        { id: 'claude-haiku-4-5', name: 'Claude Haiku 4.5 (Fast)', type: 'chat' }
     ],
     google: [
-        { id: 'gemini-2.0-flash-exp', name: 'Gemini 2.0 Flash (Recommended)', type: 'chat' },
-        { id: 'gemini-1.5-pro', name: 'Gemini 1.5 Pro', type: 'chat' },
-        { id: 'gemini-1.5-flash', name: 'Gemini 1.5 Flash (Fast)', type: 'chat' },
+        { id: 'gemini-3-pro-preview', name: 'Gemini 3 Pro Preview (Recommended)', type: 'chat' },
+        { id: 'gemini-3-flash-preview', name: 'Gemini 3 Flash Preview (Fast)', type: 'chat' },
         { id: 'text-embedding-004', name: 'Text Embedding 004', type: 'embedding', dimensions: 768 }
     ]
 };

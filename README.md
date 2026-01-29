@@ -188,17 +188,39 @@ The Elder, Journal Intelligence, and semantic search features support multiple A
 
 ### Available Models
 
-#### Chat Models (via OpenRouter)
+#### OpenRouter (100+ models with one API key)
 | Provider | Model | Notes |
 |----------|-------|-------|
-| Anthropic | Claude Sonnet 4 | Recommended |
-| Anthropic | Claude Opus 4 | Most Capable |
-| OpenAI | GPT-4o | Latest GPT |
-| OpenAI | GPT-4o Mini | Fast & Cheap |
-| Google | Gemini 2.0 Flash | Fast |
-| Google | Gemini 1.5 Pro | High quality |
-| DeepSeek | DeepSeek Chat | Budget-friendly |
-| xAI | Grok 2 | Latest Grok |
+| Anthropic | Claude Sonnet 4.5 | Recommended |
+| Anthropic | Claude Opus 4.5 | Most Capable |
+| Anthropic | Claude Haiku 4.5 | Fast & Cheap |
+| OpenAI | GPT-5.2 | Latest GPT |
+| OpenAI | GPT-5 Mini | Balanced |
+| OpenAI | GPT-5 Nano | Fast & Cheap |
+| Google | Gemini 3 Pro Preview | High quality |
+| Google | Gemini 3 Flash Preview | Fast |
+| DeepSeek | DeepSeek V3.2 | Budget-friendly |
+| xAI | Grok 4 | Latest Grok |
+
+#### OpenAI Direct
+| Model | Notes |
+|-------|-------|
+| gpt-5.2-2025-12-11 | Recommended |
+| gpt-5-mini-2025-08-07 | Balanced |
+| gpt-5-nano-2025-08-07 | Fast & Cheap |
+
+#### Anthropic Direct
+| Model | Notes |
+|-------|-------|
+| claude-sonnet-4-5 | Recommended |
+| claude-opus-4-5-20251101 | Most Capable |
+| claude-haiku-4-5 | Fast |
+
+#### Google AI Direct
+| Model | Notes |
+|-------|-------|
+| gemini-3-pro-preview | Recommended |
+| gemini-3-flash-preview | Fast |
 
 #### Embedding Models
 | Provider | Model | Dimensions |
