@@ -1,9 +1,9 @@
 {
   "id": "life-rpg",
   "name": "Life RPG",
-  "version": "3.0.0",
+  "version": "5.0.0",
   "minAppVersion": "0.15.0",
-  "description": "Gamify your life with RPG mechanics, 9 GNH life domains, character creation, and AI Life Coach.",
+  "description": "Turn your life into an RPG! Journal Intelligence analyzes your entries to shape your character. Boss Fights, Dungeon deep work, Energy tracking, 9 GNH domains, HUMAN 3.0 framework, and AI Life Coach.",
   "author": "Huy Hung",
   "authorUrl": "https://github.com/huyhungai",
   "fundingUrl": "",
