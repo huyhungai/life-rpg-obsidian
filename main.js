@@ -46,12 +46,22 @@ const AVAILABLE_MODELS = [
     { id: 'z-ai/glm-4.7', name: 'GLM-4.7', provider: 'Zhipu' }
 ];
 
+// Embedding Models for semantic search and memory
+const EMBEDDING_MODELS = [
+    { id: 'openai/text-embedding-3-small', name: 'Text Embedding 3 Small (Recommended)', provider: 'OpenAI', dimensions: 1536 },
+    { id: 'openai/text-embedding-3-large', name: 'Text Embedding 3 Large (Best Quality)', provider: 'OpenAI', dimensions: 3072 },
+    { id: 'google/text-embedding-004', name: 'Text Embedding 004', provider: 'Google', dimensions: 768 }
+];
+
 const DEFAULT_AI_SETTINGS = {
     openRouterApiKey: '',
     selectedModel: 'google/gemini-3-flash-preview',
     temperature: 0.7,
     maxTokens: 1000,
     chatHistory: [],
+    // Embedding settings
+    embeddingModel: 'openai/text-embedding-3-small',
+    embeddingEnabled: true,
     // Elder Persona Customization
     elderPersona: {
         name: 'The Elder',
@@ -68,7 +78,10 @@ const DEFAULT_AI_SETTINGS = {
         challenge: 'I seek a worthy challenge. Based on my weakest areas, suggest one meaningful quest I can undertake.',
         reflection: 'Help me reflect on my progress. What patterns do you see in my journey so far?',
         motivation: 'I need encouragement. Speak to me about my strengths and the path ahead.'
-    }
+    },
+    // Elder Memory - stores relevant past entries for context
+    elderMemoryEnabled: true,
+    elderMemoryCount: 3 // Number of relevant past entries to include
 };
 
 // Journal Intelligence Settings
@@ -93,7 +106,9 @@ const DEFAULT_JOURNAL_SETTINGS = {
     sentimentKeywords: {
         positive: ['achieved', 'grateful', 'happy', 'success', 'proud', 'love', 'excited', 'progress', 'accomplished', 'wonderful', 'amazing', 'great', 'fantastic', 'blessed', 'thankful'],
         negative: ['failed', 'stressed', 'anxious', 'sad', 'angry', 'frustrated', 'overwhelmed', 'tired', 'exhausted', 'worried', 'depressed', 'disappointed', 'difficult', 'struggling', 'terrible']
-    }
+    },
+    // Embedding storage for semantic search
+    embeddings: [] // Array of { filePath, fileName, date, embedding, summary }
 };
 
 // Elder Personality Presets
@@ -1178,6 +1193,144 @@ Only return the JSON array, no other text.`;
         };
 
         return await this.chat(prompts[topic] || prompts.general, true);
+    }
+}
+
+// ============================================================================
+// EMBEDDING SERVICE CLASS - Semantic Search & Memory
+// ============================================================================
+
+class EmbeddingService {
+    constructor(plugin) {
+        this.plugin = plugin;
+    }
+
+    // Create embedding for text using OpenRouter
+    async createEmbedding(text) {
+        const apiKey = this.plugin.settings.ai?.openRouterApiKey;
+        if (!apiKey) {
+            throw new Error('OpenRouter API key not configured');
+        }
+
+        const model = this.plugin.settings.ai?.embeddingModel || 'openai/text-embedding-3-small';
+
+        try {
+            const response = await requestUrl({
+                url: 'https://openrouter.ai/api/v1/embeddings',
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${apiKey}`,
+                    'HTTP-Referer': 'https://obsidian.md',
+                    'X-Title': 'Life RPG Plugin'
+                },
+                body: JSON.stringify({
+                    model: model,
+                    input: text.substring(0, 8000) // Limit text length
+                })
+            });
+
+            if (response.status !== 200) {
+                throw new Error(`Embedding API Error: ${response.status}`);
+            }
+
+            const data = response.json;
+            return data.data[0].embedding;
+        } catch (error) {
+            console.error('Embedding Service Error:', error);
+            throw error;
+        }
+    }
+
+    // Calculate cosine similarity between two embeddings
+    cosineSimilarity(a, b) {
+        if (!a || !b || a.length !== b.length) return 0;
+
+        let dotProduct = 0;
+        let normA = 0;
+        let normB = 0;
+
+        for (let i = 0; i < a.length; i++) {
+            dotProduct += a[i] * b[i];
+            normA += a[i] * a[i];
+            normB += b[i] * b[i];
+        }
+
+        normA = Math.sqrt(normA);
+        normB = Math.sqrt(normB);
+
+        if (normA === 0 || normB === 0) return 0;
+        return dotProduct / (normA * normB);
+    }
+
+    // Find most similar entries to a query
+    async findSimilarEntries(query, topK = 5) {
+        const embeddings = this.plugin.settings.journalSettings?.embeddings || [];
+        if (embeddings.length === 0) return [];
+
+        // Create embedding for query
+        const queryEmbedding = await this.createEmbedding(query);
+
+        // Calculate similarities
+        const similarities = embeddings.map(entry => ({
+            ...entry,
+            similarity: this.cosineSimilarity(queryEmbedding, entry.embedding)
+        }));
+
+        // Sort by similarity and return top K
+        return similarities
+            .sort((a, b) => b.similarity - a.similarity)
+            .slice(0, topK);
+    }
+
+    // Find relevant entries for Elder context
+    async getRelevantMemories(query, count = 3) {
+        try {
+            const similar = await this.findSimilarEntries(query, count);
+            return similar
+                .filter(e => e.similarity > 0.3) // Only include if similarity > 30%
+                .map(e => ({
+                    fileName: e.fileName,
+                    date: e.date,
+                    summary: e.summary,
+                    similarity: Math.round(e.similarity * 100)
+                }));
+        } catch (error) {
+            console.error('Error getting memories:', error);
+            return [];
+        }
+    }
+
+    // Create summary for embedding (shorter than full content)
+    createSummary(content, maxLength = 500) {
+        // Remove markdown formatting
+        let text = content
+            .replace(/#{1,6}\s/g, '')
+            .replace(/\*\*|__/g, '')
+            .replace(/\*|_/g, '')
+            .replace(/```[\s\S]*?```/g, '')
+            .replace(/`[^`]*`/g, '')
+            .replace(/\[([^\]]+)\]\([^)]+\)/g, '$1')
+            .replace(/!\[[^\]]*\]\([^)]+\)/g, '')
+            .trim();
+
+        // Return first maxLength characters
+        if (text.length <= maxLength) return text;
+        return text.substring(0, maxLength) + '...';
+    }
+
+    // Embed a journal entry and store it
+    async embedJournalEntry(filePath, fileName, content, date) {
+        const summary = this.createSummary(content);
+        const embedding = await this.createEmbedding(summary);
+
+        return {
+            filePath,
+            fileName,
+            date,
+            summary,
+            embedding
+        };
     }
 }
 
@@ -2498,6 +2651,84 @@ class HeroView extends ItemView {
             }
         };
 
+        // Semantic Search Section (if embeddings enabled and available)
+        const embeddingsCount = js.embeddings?.length || 0;
+        if (s.ai?.embeddingEnabled && s.ai?.openRouterApiKey && embeddingsCount > 0) {
+            container.createEl('h4', { text: '🔍 Semantic Search' });
+            const searchSection = container.createDiv({ cls: 'rpg-journal-search' });
+
+            const searchInfo = searchSection.createDiv({ cls: 'rpg-search-info' });
+            searchInfo.textContent = `${embeddingsCount} journal entries indexed for semantic search`;
+
+            const searchInputRow = searchSection.createDiv({ cls: 'rpg-search-row' });
+            const searchInput = searchInputRow.createEl('input', {
+                type: 'text',
+                placeholder: 'Search by meaning... e.g., "times I felt grateful"',
+                cls: 'rpg-search-input'
+            });
+
+            const searchBtn = searchInputRow.createEl('button', {
+                text: '🔎',
+                cls: 'rpg-search-btn'
+            });
+
+            const searchResults = searchSection.createDiv({ cls: 'rpg-search-results' });
+
+            const performSearch = async () => {
+                const query = searchInput.value.trim();
+                if (!query) return;
+
+                searchBtn.textContent = '⏳';
+                searchBtn.disabled = true;
+                searchResults.empty();
+
+                try {
+                    const embeddingService = new EmbeddingService(this.plugin);
+                    const results = await embeddingService.findSimilarEntries(query, 5);
+
+                    if (results.length === 0) {
+                        searchResults.innerHTML = '<div class="rpg-search-empty">No matching entries found</div>';
+                    } else {
+                        results.forEach(result => {
+                            const resultItem = searchResults.createDiv({ cls: 'rpg-search-result-item' });
+                            const similarity = Math.round(result.similarity * 100);
+                            resultItem.innerHTML = `
+                                <div class="rpg-search-result-header">
+                                    <span class="rpg-search-result-name">${result.fileName}</span>
+                                    <span class="rpg-search-result-score">${similarity}% match</span>
+                                </div>
+                                <div class="rpg-search-result-summary">${result.summary?.substring(0, 150) || ''}...</div>
+                                <div class="rpg-search-result-date">${result.date?.split('T')[0] || ''}</div>
+                            `;
+
+                            // Click to open the note
+                            resultItem.onclick = async () => {
+                                const file = this.app.vault.getAbstractFileByPath(result.filePath);
+                                if (file) {
+                                    await this.app.workspace.openLinkText(file.path, '', false);
+                                }
+                            };
+                        });
+                    }
+                } catch (e) {
+                    searchResults.innerHTML = `<div class="rpg-search-error">Search failed: ${e.message}</div>`;
+                }
+
+                searchBtn.textContent = '🔎';
+                searchBtn.disabled = false;
+            };
+
+            searchBtn.onclick = performSearch;
+            searchInput.onkeypress = (e) => { if (e.key === 'Enter') performSearch(); };
+        } else if (s.ai?.openRouterApiKey && embeddingsCount === 0) {
+            // Show message to sync for embeddings
+            const embedMsg = container.createDiv({ cls: 'rpg-journal-embed-notice' });
+            embedMsg.innerHTML = `
+                <span class="rpg-embed-icon">💡</span>
+                <span>Sync your journals to enable semantic search</span>
+            `;
+        }
+
         // Recent Analysis Results
         if (js.recentAnalysis && js.recentAnalysis.length > 0) {
             container.createEl('h4', { text: '📊 Recent Analysis' });
@@ -2840,7 +3071,31 @@ class HeroView extends ItemView {
 
         try {
             const aiService = new AIService(this.plugin);
-            const response = await aiService.chat(message, true);
+
+            // Enhance message with relevant memories if enabled
+            let enhancedMessage = message;
+            if (this.plugin.settings.ai?.elderMemoryEnabled &&
+                this.plugin.settings.ai?.embeddingEnabled &&
+                this.plugin.settings.ai?.openRouterApiKey &&
+                this.plugin.settings.journalSettings?.embeddings?.length > 0) {
+                try {
+                    const embeddingService = new EmbeddingService(this.plugin);
+                    const memoryCount = this.plugin.settings.ai?.elderMemoryCount || 3;
+                    const memories = await embeddingService.getRelevantMemories(message, memoryCount);
+
+                    if (memories.length > 0) {
+                        const memoryContext = memories.map(m =>
+                            `- From "${m.fileName}" (${m.date?.split('T')[0] || 'unknown date'}): ${m.summary}`
+                        ).join('\n');
+
+                        enhancedMessage = `${message}\n\n[The Elder recalls relevant memories from your journal...]\n${memoryContext}`;
+                    }
+                } catch (memErr) {
+                    console.log('Memory retrieval skipped:', memErr.message);
+                }
+            }
+
+            const response = await aiService.chat(enhancedMessage, true);
 
             if (isQuickAction) {
                 // Show natural language display message instead of the actual prompt
@@ -4697,6 +4952,98 @@ class LifeRPGSettingTab extends PluginSettingTab {
             </ul>
         `;
 
+        // Embedding & Semantic Search Section
+        containerEl.createEl('h3', { text: '🔍 Semantic Search & Elder Memory' });
+
+        new Setting(containerEl)
+            .setName('Enable Embeddings')
+            .setDesc('Create embeddings for journal entries to enable semantic search and Elder memory. Requires API key.')
+            .addToggle(toggle => toggle
+                .setValue(this.plugin.settings.ai?.embeddingEnabled ?? true)
+                .onChange(async (value) => {
+                    if (!this.plugin.settings.ai) {
+                        this.plugin.settings.ai = { ...DEFAULT_AI_SETTINGS };
+                    }
+                    this.plugin.settings.ai.embeddingEnabled = value;
+                    await this.plugin.saveSettings();
+                }));
+
+        new Setting(containerEl)
+            .setName('Embedding Model')
+            .setDesc('Choose which model to use for creating embeddings.')
+            .addDropdown(dd => {
+                EMBEDDING_MODELS.forEach(model => {
+                    dd.addOption(model.id, `${model.name} (${model.provider})`);
+                });
+                dd.setValue(this.plugin.settings.ai?.embeddingModel || 'openai/text-embedding-3-small');
+                dd.onChange(async (value) => {
+                    if (!this.plugin.settings.ai) {
+                        this.plugin.settings.ai = { ...DEFAULT_AI_SETTINGS };
+                    }
+                    this.plugin.settings.ai.embeddingModel = value;
+                    await this.plugin.saveSettings();
+                });
+            });
+
+        new Setting(containerEl)
+            .setName('Elder Memory')
+            .setDesc('Allow the Elder to recall relevant past journal entries when chatting.')
+            .addToggle(toggle => toggle
+                .setValue(this.plugin.settings.ai?.elderMemoryEnabled ?? true)
+                .onChange(async (value) => {
+                    if (!this.plugin.settings.ai) {
+                        this.plugin.settings.ai = { ...DEFAULT_AI_SETTINGS };
+                    }
+                    this.plugin.settings.ai.elderMemoryEnabled = value;
+                    await this.plugin.saveSettings();
+                }));
+
+        new Setting(containerEl)
+            .setName('Memory Count')
+            .setDesc('Number of relevant past entries to include in Elder conversations (1-5)')
+            .addSlider(slider => slider
+                .setLimits(1, 5, 1)
+                .setValue(this.plugin.settings.ai?.elderMemoryCount || 3)
+                .setDynamicTooltip()
+                .onChange(async (value) => {
+                    if (!this.plugin.settings.ai) {
+                        this.plugin.settings.ai = { ...DEFAULT_AI_SETTINGS };
+                    }
+                    this.plugin.settings.ai.elderMemoryCount = value;
+                    await this.plugin.saveSettings();
+                }));
+
+        // Embedding stats
+        const embeddingsCount = this.plugin.settings.journalSettings?.embeddings?.length || 0;
+        const embeddingInfoEl = containerEl.createDiv({ cls: 'rpg-settings-info' });
+        embeddingInfoEl.innerHTML = `
+            <p><strong>Embedding Statistics:</strong></p>
+            <ul>
+                <li>Journal entries indexed: ${embeddingsCount}</li>
+                <li>Semantic search: ${embeddingsCount > 0 ? '✅ Available' : '❌ Sync journals first'}</li>
+                <li>Elder memory: ${this.plugin.settings.ai?.elderMemoryEnabled && embeddingsCount > 0 ? '✅ Active' : '❌ Needs embeddings'}</li>
+            </ul>
+        `;
+
+        // Clear embeddings button
+        if (embeddingsCount > 0) {
+            new Setting(containerEl)
+                .setName('Clear Embeddings')
+                .setDesc('Remove all stored embeddings. You will need to sync journals again to recreate them.')
+                .addButton(btn => btn
+                    .setButtonText('Clear All Embeddings')
+                    .setWarning()
+                    .onClick(async () => {
+                        if (!this.plugin.settings.journalSettings) {
+                            this.plugin.settings.journalSettings = JSON.parse(JSON.stringify(DEFAULT_JOURNAL_SETTINGS));
+                        }
+                        this.plugin.settings.journalSettings.embeddings = [];
+                        await this.plugin.saveSettings();
+                        new Notice('🗑️ All embeddings cleared');
+                        this.display();
+                    }));
+        }
+
         // Game Actions Section
         containerEl.createEl('h3', { text: '🎮 Game Actions' });
 
@@ -5517,6 +5864,30 @@ module.exports = class LifeRPG extends Plugin {
                     sentiment: analysis.offline?.sentiment?.score || (analysis.ai?.sentiment || 0),
                     hasAI: !!analysis.ai
                 });
+
+                // Create embedding for semantic search (if enabled and API key available)
+                if (this.settings.ai?.embeddingEnabled && this.settings.ai?.openRouterApiKey) {
+                    try {
+                        const embeddingService = new EmbeddingService(this);
+                        const content = await this.app.vault.read(note);
+                        const embeddingData = await embeddingService.embedJournalEntry(
+                            note.path,
+                            note.basename,
+                            content,
+                            analysis.modifiedDate
+                        );
+
+                        // Store or update embedding
+                        const existingIdx = js.embeddings.findIndex(e => e.filePath === note.path);
+                        if (existingIdx >= 0) {
+                            js.embeddings[existingIdx] = embeddingData;
+                        } else {
+                            js.embeddings.push(embeddingData);
+                        }
+                    } catch (embErr) {
+                        console.log(`Embedding skipped for ${note.basename}:`, embErr.message);
+                    }
+                }
 
             } catch (e) {
                 console.error(`Error analyzing note ${note.path}:`, e);

@@ -9,6 +9,8 @@ Turn your life into an RPG! An Obsidian plugin that gamifies personal developmen
 ## What's New in v5.0.0
 
 - **Journal Intelligence** - Analyze your journal entries to automatically affect character stats
+- **Semantic Search** - Search journals by meaning using AI embeddings
+- **Elder Memory** - The Elder recalls relevant past journal entries during conversations
 - **Elder Tab Redesign** - RPG-themed AI coach with customizable persona
 - **HUMAN 3.0 Framework** - Deep integration with development levels and quadrants
 - **Tab Reorganization** - Simplified from 11 to 7 intuitive tabs
@@ -44,7 +46,17 @@ Analyze your journal entries to shape your character:
 - **Keyword detection** for each life domain
 - **Sentiment analysis** - positive entries gain XP, challenges may cost HP
 - **AI-enhanced analysis** (with OpenRouter API)
+- **Semantic search** - Search journals by meaning, not just keywords
 - Configure journal folder or tag to scan
+
+### Semantic Search & Elder Memory
+
+Powered by AI embeddings for deeper understanding:
+
+- **Search by meaning** - Find entries about "times I felt grateful" even without those exact words
+- **Elder Memory** - The Elder recalls relevant past journal entries during conversations
+- **Configurable memory** - Choose how many past entries to include in Elder context
+- **Embedding models**: OpenAI Text Embedding 3 (Small/Large), Google Text Embedding 004
 
 ### The Elder (AI Life Coach)
 
@@ -55,6 +67,7 @@ A wise guide with deep knowledge of the HUMAN 3.0 framework:
 - **Custom knowledge base** - Add personal context about yourself
 - **Quick wisdom buttons** - Guidance, Challenge, Reflection, Courage
 - **Natural conversations** - No code or JSON visible
+- **Semantic memory** - Recalls relevant past journal entries when chatting
 
 ### 9 Life Domains (GNH Framework)
 
@@ -189,6 +202,8 @@ All models accessed via [OpenRouter](https://openrouter.ai) - pay only for what 
 
 ### v5.0.0
 - Journal Intelligence with AI-enhanced analysis
+- Semantic search using AI embeddings (search by meaning)
+- Elder Memory - recalls relevant past journal entries
 - Elder Tab redesign with customizable persona
 - HUMAN 3.0 framework deep integration
 - Tab reorganization (11 → 7 tabs)
