@@ -256,6 +256,30 @@ You can use different providers for chat and embeddings. For example, use Anthro
 - **Custom Instructions**: Modify AI behavior
 - **Quick Prompts**: Customize wisdom button actions
 
+## For Developers
+
+Want to contribute or modify the plugin? All development files are in the [`dev/`](dev/) folder.
+
+**Quick start**:
+```bash
+npm install          # Install dependencies
+npm run build        # Build plugin
+npm run watch        # Auto-rebuild on changes
+```
+
+**Documentation**:
+- [dev/CLAUDE.md](dev/CLAUDE.md) - Complete project context
+- [dev/README.md](dev/README.md) - Development guide
+- [dev/MODULAR-READY.md](dev/MODULAR-READY.md) - Architecture overview
+
+**Source code structure**:
+- `dev/src/constants.js` - Configuration
+- `dev/src/services/SkillService.js` - Skill logic
+- `dev/src/views/HeroView.js` - UI code
+- `dev/main-core.js` - Core mechanics
+
+The build system combines these into `main.js` for Obsidian.
+
 ## Support
 
 - [Report Issues](https://github.com/huyhungai/life-rpg-obsidian/issues)

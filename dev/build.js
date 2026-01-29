@@ -10,10 +10,10 @@ const path = require('path');
 // HYBRID APPROACH BUILD ORDER
 // Extracted modules are built separately, then combined with main-core.js
 const BUILD_ORDER = [
-    'src/constants.js',           // Configuration (150 lines)
-    'src/services/SkillService.js', // Skill logic (370 lines)
-    'src/views/HeroView.js',        // UI code (2261 lines)
-    'main-core.js'                  // Everything else
+    'dev/src/constants.js',           // Configuration (150 lines)
+    'dev/src/services/SkillService.js', // Skill logic (370 lines)
+    'dev/src/views/HeroView.js',        // UI code (2261 lines)
+    'dev/main-core.js'                  // Everything else
 ];
 
 function stripModuleExports(content) {
@@ -38,7 +38,7 @@ const { Plugin, ItemView, Notice, Modal, Setting, PluginSettingTab, requestUrl, 
     let filesProcessed = 0;
 
     for (const file of BUILD_ORDER) {
-        const filePath = path.join(__dirname, file);
+        const filePath = path.join(__dirname, '..', file);
 
         if (!fs.existsSync(filePath)) {
             console.log(`⚠️  Skipping missing file: ${file}`);
@@ -57,8 +57,8 @@ const { Plugin, ItemView, Notice, Modal, Setting, PluginSettingTab, requestUrl, 
         filesProcessed++;
     }
 
-    // Write output
-    const outputPath = path.join(__dirname, 'main.js');
+    // Write output to root folder
+    const outputPath = path.join(__dirname, '..', 'main.js');
     fs.writeFileSync(outputPath, combined, 'utf8');
 
     console.log(`\n✅ Build complete! Processed ${filesProcessed} files`);

@@ -3,7 +3,7 @@ const { Plugin, ItemView, Notice, Modal, Setting, PluginSettingTab, requestUrl, 
 
 
 // ============================================================================
-// SRC/CONSTANTS.JS
+// DEV/SRC/CONSTANTS.JS
 // ============================================================================
 
 /* Life RPG Constants - Extracted from main.js */
@@ -186,7 +186,7 @@ function getActiveEmbeddingModel(settings) {
 // No need for module.exports in final build, but kept for IDE support
 
 // ============================================================================
-// SRC/SERVICES/SKILLSERVICE.JS
+// DEV/SRC/SERVICES/SKILLSERVICE.JS
 // ============================================================================
 
 /* SkillService - Skill Discovery, Evolution & Management */
@@ -568,7 +568,7 @@ Empty if nothing: []`;
 }
 
 // ============================================================================
-// SRC/VIEWS/HEROVIEW.JS
+// DEV/SRC/VIEWS/HEROVIEW.JS
 // ============================================================================
 
 class HeroView extends ItemView {
@@ -2834,7 +2834,7 @@ class HeroView extends ItemView {
 }
 
 // ============================================================================
-// MAIN-CORE.JS
+// DEV/MAIN-CORE.JS
 // ============================================================================
 
 /* Main Core - Stable code (extracted modules removed) */

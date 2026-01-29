@@ -4,8 +4,8 @@
   "description": "Life RPG - Gamify your life with RPG mechanics",
   "main": "main.js",
   "scripts": {
-    "build": "node dev/build.js",
-    "watch": "nodemon --watch dev/src -e js --exec 'npm run build'",
+    "build": "node build.js",
+    "watch": "nodemon --watch src -e js --exec 'npm run build'",
     "dev": "npm run build && npm run watch"
   },
   "devDependencies": {
