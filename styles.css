@@ -4162,9 +4162,14 @@
     border-radius: 8px;
 }
 
-.rpg-skill-levelup-btn {
-    width: 100%;
+.rpg-skill-buttons {
+    display: flex;
+    gap: 8px;
     margin-top: 8px;
+}
+
+.rpg-skill-levelup-btn {
+    flex: 1;
     padding: 6px 12px;
     background: var(--rpg-skill-color);
     color: white;
@@ -4177,6 +4182,22 @@
 
 .rpg-skill-levelup-btn:hover {
     background: #8844dd;
+}
+
+.rpg-skill-delete-btn {
+    background: rgba(231, 76, 60, 0.1);
+    padding: 6px 10px;
+    color: #e74c3c;
+    border: 1px solid rgba(231, 76, 60, 0.3);
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 0.9em;
+    transition: all 0.2s;
+}
+
+.rpg-skill-delete-btn:hover {
+    background: rgba(231, 76, 60, 0.2);
+    border-color: #e74c3c;
 }
 
 .rpg-skill-tips {
@@ -4199,6 +4220,18 @@
     margin-bottom: 5px;
     color: var(--text-muted);
     font-size: 0.9em;
+}
+
+/* Skill Warning */
+.rpg-skill-warning {
+    background: rgba(255, 152, 0, 0.1);
+    border: 1px solid rgba(255, 152, 0, 0.3);
+    color: var(--text-normal);
+    padding: 12px 15px;
+    border-radius: 8px;
+    margin: 10px 0;
+    font-size: 0.9em;
+    text-align: center;
 }
 
 /* Add Skill Modal */

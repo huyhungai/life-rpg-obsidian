@@ -1,0 +1,22 @@
+{
+  "name": "life-rpg-plugin",
+  "version": "5.0.0",
+  "description": "Life RPG - Gamify your life with RPG mechanics",
+  "main": "main.js",
+  "scripts": {
+    "build": "node build.js",
+    "watch": "nodemon --watch src -e js --exec 'npm run build'",
+    "dev": "npm run build && npm run watch"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.2"
+  },
+  "keywords": [
+    "obsidian",
+    "plugin",
+    "rpg",
+    "gamification"
+  ],
+  "author": "Life RPG Team",
+  "license": "MIT"
+}

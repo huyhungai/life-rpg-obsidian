@@ -1,18 +1,16 @@
-# Node
+# Dependencies
 node_modules/
-npm-debug.log
+package-lock.json
 
-# Build
-*.js.map
+# Build output (generated from src/)
+# main.js
 
-# OS
+# Development
 .DS_Store
-Thumbs.db
-
-# IDE
-.idea/
+*.log
 .vscode/
-*.sublime-*
+.idea/
 
-# Screenshots (optional - remove if you want to include them)
-# Screenshot/
+# Keep manifest and styles (needed for plugin)
+!manifest.json
+!styles.css
