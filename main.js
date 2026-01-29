@@ -1820,46 +1820,78 @@ class SkillService {
 
         const aiService = new AIService(this.plugin);
 
-        const prompt = `Analyze this journal entry and identify any skills the person is practicing, learning, or developing.
+        const prompt = `You are a skill discovery AI for an RPG life game. Your job is to find ANY activities, work, hobbies, or practices in this journal entry that represent skills.
 
-For each skill found, determine:
-1. The skill name (be specific, e.g., "Python Programming" not just "Programming")
-2. The category: "mind" (mental/emotional skills), "body" (physical skills), "spirit" (social/connection skills), or "vocation" (career/craft skills)
-3. A brief description
-4. Estimated XP to award based on practice intensity (5-50)
+BE VERY INCLUSIVE - if someone mentions doing ANY activity, that's a skill! Look for:
+
+VOCATION (career/business/craft skills):
+- Sales & retail (selling, retail sales, customer service, upselling, inventory)
+- Business (marketing, accounting, management, negotiation, pricing)
+- Creative (writing, design, photography, video editing, music)
+- Technical (programming, data analysis, IT support)
+- Trade skills (repair, construction, crafting)
+
+MIND (mental/learning skills):
+- Learning & studying (reading, research, courses, practice)
+- Thinking (problem-solving, planning, analysis, decision-making)
+- Emotional (meditation, journaling, self-reflection, stress management)
+
+BODY (physical skills):
+- Exercise (running, gym, yoga, swimming, sports)
+- Health (cooking, meal prep, sleep habits)
+- Physical work (gardening, cleaning, manual labor)
+
+SPIRIT (social/connection skills):
+- Relationships (networking, mentoring, helping others)
+- Communication (public speaking, teaching, listening)
+- Community (volunteering, organizing events)
 
 Journal entry from "${fileName}":
+---
 ${content.substring(0, 3000)}
+---
 
-Return ONLY a JSON array (no other text):
-[
-  {"name": "Skill Name", "category": "vocation", "description": "Brief description", "xp": 20},
-  ...
-]
+Extract ALL skills/activities mentioned. Be specific with names (e.g., "Retail Sales" not "Sales", "Vietnamese Cooking" not "Cooking").
 
-If no skills are mentioned, return an empty array: []`;
+Return ONLY valid JSON array:
+[{"name": "Skill Name", "category": "vocation|mind|body|spirit", "description": "What they did", "xp": 10-50}]
 
+Empty if truly nothing: []`;
+
+        let response = '';
         try {
-            const response = await aiService.callProvider(
+            response = await aiService.callProvider(
                 [{ role: 'user', content: prompt }],
                 this.plugin.settings.ai?.provider || 'openrouter',
                 apiKey,
                 getActiveChatModel(this.plugin.settings),
                 0.3, // Low temperature for consistent parsing
-                500
+                800  // More tokens for multiple skills
             );
 
-            // Parse JSON from response
-            let jsonStr = response;
-            if (response.includes('```')) {
-                const match = response.match(/```(?:json)?\s*([\s\S]*?)```/);
-                if (match) jsonStr = match[1];
+            console.log('Skill discovery raw response:', response);
+
+            // Parse JSON from response - handle various formats
+            let jsonStr = response.trim();
+
+            // Remove markdown code blocks if present
+            if (jsonStr.includes('```')) {
+                const match = jsonStr.match(/```(?:json)?\s*([\s\S]*?)```/);
+                if (match) jsonStr = match[1].trim();
             }
 
-            const discoveredSkills = JSON.parse(jsonStr.trim());
+            // Try to find JSON array in response
+            const arrayMatch = jsonStr.match(/\[[\s\S]*\]/);
+            if (arrayMatch) {
+                jsonStr = arrayMatch[0];
+            }
+
+            const discoveredSkills = JSON.parse(jsonStr);
+            console.log('Skills discovered:', discoveredSkills);
             return Array.isArray(discoveredSkills) ? discoveredSkills : [];
         } catch (error) {
             console.error('Skill discovery error:', error);
+            console.error('Raw response was:', response);
             return [];
         }
     }
@@ -6888,13 +6920,25 @@ module.exports = class LifeRPG extends Plugin {
         let skillsLeveledUp = 0;
         const apiKey = getActiveApiKey(this.settings);
 
-        if (this.settings.skillsSettings?.autoDiscovery && apiKey) {
+        // Ensure skillsSettings exists with defaults
+        if (!this.settings.skillsSettings) {
+            this.settings.skillsSettings = { ...DEFAULT_SKILLS_SETTINGS };
+        }
+
+        const autoDiscovery = this.settings.skillsSettings.autoDiscovery !== false; // Default true
+        console.log('Skill Discovery Check:', { autoDiscovery, hasApiKey: !!apiKey, notesCount: newNotes.length });
+
+        if (autoDiscovery && apiKey) {
+            new Notice('🎯 Discovering skills from journals...');
             const skillService = new SkillService(this);
 
             for (const note of newNotes) {
                 try {
                     const content = await this.app.vault.read(note);
+                    console.log(`Analyzing skills in: ${note.basename} (${content.length} chars)`);
+
                     const discovered = await skillService.discoverSkillsFromJournal(content, note.basename);
+                    console.log(`Found ${discovered.length} skills in ${note.basename}:`, discovered);
 
                     if (discovered.length > 0) {
                         const results = await skillService.processDiscoveredSkills(discovered);
@@ -6905,6 +6949,7 @@ module.exports = class LifeRPG extends Plugin {
                                 this.logActivity('skill_discovered', `Discovered skill: ${result.skill.name}`, {
                                     category: result.skill.category
                                 });
+                                new Notice(`🎯 New skill discovered: ${result.skill.name}`);
                             } else if (result.levelsGained > 0) {
                                 skillsLeveledUp += result.levelsGained;
                                 this.logActivity('skill_levelup', `${result.skill.name} leveled up!`, {
@@ -6914,9 +6959,11 @@ module.exports = class LifeRPG extends Plugin {
                         }
                     }
                 } catch (skillErr) {
-                    console.log(`Skill discovery skipped for ${note.basename}:`, skillErr.message);
+                    console.error(`Skill discovery error for ${note.basename}:`, skillErr);
                 }
             }
+        } else {
+            console.log('Skill discovery skipped:', { autoDiscovery, hasApiKey: !!apiKey });
         }
 
         // Update journal settings
