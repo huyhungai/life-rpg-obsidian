@@ -136,11 +136,23 @@ The Elder and Journal AI features require an OpenRouter API key:
 5. Customize your Elder's persona in the Elder tab (⚙️ button)
 
 ### Supported AI Models
-- Google Gemini (Flash, Pro)
-- OpenAI GPT (4o, 4o-mini)
-- Anthropic Claude (Sonnet, Haiku)
-- Meta Llama
-- And many more via OpenRouter
+
+| Provider | Model | Notes |
+|----------|-------|-------|
+| **Anthropic** | Claude Sonnet 4.5 | Recommended |
+| **Anthropic** | Claude Opus 4.5 | Most Capable |
+| **Anthropic** | Claude Haiku 4.5 | Fast & Cheap |
+| **OpenAI** | GPT-5.2 | Latest GPT |
+| **Google** | Gemini 3 Pro Preview | High quality |
+| **Google** | Gemini 3 Flash Preview | Fast (Default) |
+| **DeepSeek** | DeepSeek V3.2 | Budget-friendly |
+| **xAI** | Grok 4.1 Fast | Fast responses |
+| **Alibaba** | Qwen3 Max | Powerful |
+| **Alibaba** | Qwen3 VL 32B | Vision support |
+| **Moonshot** | Kimi K2.5 | Chinese-optimized |
+| **Zhipu** | GLM-4.7 | Chinese AI |
+
+All models accessed via [OpenRouter](https://openrouter.ai) - pay only for what you use.
 
 ## Screenshots
 
