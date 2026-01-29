@@ -3925,3 +3925,57 @@
 .rpg-embed-icon {
     font-size: 1.2em;
 }
+
+/* ============================================================================
+   SETTINGS TAB STYLES
+   ============================================================================ */
+
+.rpg-settings-info {
+    background: var(--background-secondary);
+    padding: 15px;
+    border-radius: 8px;
+    margin: 15px 0;
+    border-left: 3px solid var(--interactive-accent);
+}
+
+.rpg-settings-info h4 {
+    margin: 0 0 10px 0;
+    color: var(--text-normal);
+}
+
+.rpg-settings-info ol,
+.rpg-settings-info ul {
+    margin: 10px 0;
+    padding-left: 20px;
+}
+
+.rpg-settings-info li {
+    margin-bottom: 5px;
+    color: var(--text-muted);
+}
+
+.rpg-settings-note {
+    font-size: 0.9em;
+    color: var(--text-muted);
+    margin-top: 10px;
+    font-style: italic;
+}
+
+.rpg-settings-status {
+    padding: 10px 15px;
+    background: rgba(40, 167, 69, 0.1);
+    border-radius: 6px;
+    margin: 15px 0;
+    color: var(--text-normal);
+    border-left: 3px solid var(--rpg-success-color);
+}
+
+.rpg-settings-warning {
+    padding: 10px 15px;
+    background: rgba(255, 170, 0, 0.1);
+    border-radius: 6px;
+    margin: 10px 0;
+    color: var(--text-normal);
+    border-left: 3px solid var(--rpg-gold-color);
+    font-size: 0.9em;
+}

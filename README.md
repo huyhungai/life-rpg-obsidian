@@ -8,6 +8,7 @@ Turn your life into an RPG! An Obsidian plugin that gamifies personal developmen
 
 ## What's New in v5.0.0
 
+- **Multi-Provider AI** - Choose from OpenRouter, OpenAI, Anthropic, or Google AI
 - **Journal Intelligence** - Analyze your journal entries to automatically affect character stats
 - **Semantic Search** - Search journals by meaning using AI embeddings
 - **Elder Memory** - The Elder recalls relevant past journal entries during conversations
@@ -140,32 +141,57 @@ A wise guide with deep knowledge of the HUMAN 3.0 framework:
 
 ## AI Setup (Optional)
 
-The Elder and Journal AI features require an OpenRouter API key:
+The Elder, Journal Intelligence, and semantic search features support multiple AI providers. Choose the one that works best for you.
 
-1. Go to [openrouter.ai](https://openrouter.ai) and create an account
-2. Generate an API key
-3. In Obsidian: Settings → Life RPG → paste your API key
-4. Select your preferred AI model
-5. Customize your Elder's persona in the Elder tab (⚙️ button)
+### Supported Providers
 
-### Supported AI Models
+| Provider | Chat | Embeddings | Notes |
+|----------|------|------------|-------|
+| **OpenRouter** | ✅ | ✅ | 100+ models with one API key (Recommended) |
+| **OpenAI** | ✅ | ✅ | GPT models directly from OpenAI |
+| **Anthropic** | ✅ | ❌ | Claude models (no embedding support) |
+| **Google AI** | ✅ | ✅ | Gemini models with free tier |
 
+### Quick Setup
+
+1. In Obsidian: Settings → Life RPG
+2. Choose your **AI Provider**
+3. Enter your **API Key** for that provider
+4. Select your preferred **Chat Model**
+5. (Optional) Choose a different provider for **Embeddings**
+6. Customize your Elder's persona in the Elder tab (⚙️ button)
+
+### Getting API Keys
+
+| Provider | Where to get key |
+|----------|------------------|
+| OpenRouter | [openrouter.ai](https://openrouter.ai) → Keys |
+| OpenAI | [platform.openai.com](https://platform.openai.com) → API Keys |
+| Anthropic | [console.anthropic.com](https://console.anthropic.com) → API Keys |
+| Google AI | [makersuite.google.com](https://makersuite.google.com) → Get API Key |
+
+### Available Models
+
+#### Chat Models (via OpenRouter)
 | Provider | Model | Notes |
 |----------|-------|-------|
-| **Anthropic** | Claude Sonnet 4.5 | Recommended |
-| **Anthropic** | Claude Opus 4.5 | Most Capable |
-| **Anthropic** | Claude Haiku 4.5 | Fast & Cheap |
-| **OpenAI** | GPT-5.2 | Latest GPT |
-| **Google** | Gemini 3 Pro Preview | High quality |
-| **Google** | Gemini 3 Flash Preview | Fast (Default) |
-| **DeepSeek** | DeepSeek V3.2 | Budget-friendly |
-| **xAI** | Grok 4 | Latest Grok |
-| **Alibaba** | Qwen3 Max | Powerful |
-| **Alibaba** | Qwen3 VL 32B | Vision support |
-| **Moonshot** | Kimi K2.5 | Chinese-optimized |
-| **Zhipu** | GLM-4.7 | Chinese AI |
+| Anthropic | Claude Sonnet 4 | Recommended |
+| Anthropic | Claude Opus 4 | Most Capable |
+| OpenAI | GPT-4o | Latest GPT |
+| OpenAI | GPT-4o Mini | Fast & Cheap |
+| Google | Gemini 2.0 Flash | Fast |
+| Google | Gemini 1.5 Pro | High quality |
+| DeepSeek | DeepSeek Chat | Budget-friendly |
+| xAI | Grok 2 | Latest Grok |
 
-All models accessed via [OpenRouter](https://openrouter.ai) - pay only for what you use.
+#### Embedding Models
+| Provider | Model | Dimensions |
+|----------|-------|------------|
+| OpenAI | Text Embedding 3 Small | 1536 |
+| OpenAI | Text Embedding 3 Large | 3072 |
+| Google | Text Embedding 004 | 768 |
+
+You can use different providers for chat and embeddings. For example, use Anthropic for the Elder chat and OpenAI for embeddings.
 
 ## Screenshots
 

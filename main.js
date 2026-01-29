@@ -27,62 +27,190 @@ function renderMarkdownToHtml(text) {
 const VIEW_TYPE_HERO = "life-rpg-hero-view";
 
 // ============================================================================
-// OPENROUTER AI CONFIGURATION
+// MULTI-PROVIDER AI CONFIGURATION
 // ============================================================================
-const OPENROUTER_API_URL = 'https://openrouter.ai/api/v1/chat/completions';
 
-const AVAILABLE_MODELS = [
-    { id: 'anthropic/claude-sonnet-4.5', name: 'Claude Sonnet 4.5 (Recommended)', provider: 'Anthropic' },
-    { id: 'anthropic/claude-opus-4.5', name: 'Claude Opus 4.5 (Most Capable)', provider: 'Anthropic' },
-    { id: 'anthropic/claude-haiku-4.5', name: 'Claude Haiku 4.5 (Fast & Cheap)', provider: 'Anthropic' },
-    { id: 'openai/gpt-5.2', name: 'GPT-5.2', provider: 'OpenAI' },
-    { id: 'google/gemini-3-pro-preview', name: 'Gemini 3 Pro Preview', provider: 'Google' },
-    { id: 'google/gemini-3-flash-preview', name: 'Gemini 3 Flash Preview (Fast)', provider: 'Google' },
-    { id: 'deepseek/deepseek-v3.2', name: 'DeepSeek V3.2 (Cheap)', provider: 'DeepSeek' },
-    { id: 'x-ai/grok-4', name: 'Grok 4', provider: 'xAI' },
-    { id: 'qwen/qwen3-max', name: 'Qwen3 Max', provider: 'Alibaba' },
-    { id: 'qwen/qwen3-vl-32b-instruct', name: 'Qwen3 VL 32B (Vision)', provider: 'Alibaba' },
-    { id: 'moonshotai/kimi-k2.5', name: 'Kimi K2.5', provider: 'Moonshot' },
-    { id: 'z-ai/glm-4.7', name: 'GLM-4.7', provider: 'Zhipu' }
-];
+// AI Provider Configurations
+const AI_PROVIDERS = {
+    openrouter: {
+        id: 'openrouter',
+        name: 'OpenRouter',
+        description: 'Access 100+ models with one API key',
+        chatEndpoint: 'https://openrouter.ai/api/v1/chat/completions',
+        embeddingEndpoint: 'https://openrouter.ai/api/v1/embeddings',
+        authHeader: 'Authorization',
+        authPrefix: 'Bearer ',
+        extraHeaders: {
+            'HTTP-Referer': 'https://obsidian.md',
+            'X-Title': 'Life RPG Plugin'
+        },
+        supportsEmbeddings: true
+    },
+    openai: {
+        id: 'openai',
+        name: 'OpenAI',
+        description: 'GPT models directly from OpenAI',
+        chatEndpoint: 'https://api.openai.com/v1/chat/completions',
+        embeddingEndpoint: 'https://api.openai.com/v1/embeddings',
+        authHeader: 'Authorization',
+        authPrefix: 'Bearer ',
+        extraHeaders: {},
+        supportsEmbeddings: true
+    },
+    anthropic: {
+        id: 'anthropic',
+        name: 'Anthropic',
+        description: 'Claude models directly from Anthropic',
+        chatEndpoint: 'https://api.anthropic.com/v1/messages',
+        embeddingEndpoint: null, // Anthropic doesn't have embeddings API
+        authHeader: 'x-api-key',
+        authPrefix: '',
+        extraHeaders: {
+            'anthropic-version': '2023-06-01'
+        },
+        supportsEmbeddings: false
+    },
+    google: {
+        id: 'google',
+        name: 'Google AI',
+        description: 'Gemini models from Google AI Studio',
+        chatEndpoint: 'https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent',
+        embeddingEndpoint: 'https://generativelanguage.googleapis.com/v1beta/models/{model}:embedContent',
+        authHeader: null, // Uses query param
+        authPrefix: '',
+        extraHeaders: {},
+        supportsEmbeddings: true
+    }
+};
 
-// Embedding Models for semantic search and memory
-const EMBEDDING_MODELS = [
-    { id: 'openai/text-embedding-3-small', name: 'Text Embedding 3 Small (Recommended)', provider: 'OpenAI', dimensions: 1536 },
-    { id: 'openai/text-embedding-3-large', name: 'Text Embedding 3 Large (Best Quality)', provider: 'OpenAI', dimensions: 3072 },
-    { id: 'google/text-embedding-004', name: 'Text Embedding 004', provider: 'Google', dimensions: 768 }
-];
+// Models by Provider
+const MODELS_BY_PROVIDER = {
+    openrouter: [
+        { id: 'anthropic/claude-sonnet-4', name: 'Claude Sonnet 4 (Recommended)', type: 'chat' },
+        { id: 'anthropic/claude-opus-4', name: 'Claude Opus 4 (Most Capable)', type: 'chat' },
+        { id: 'anthropic/claude-haiku-3.5', name: 'Claude Haiku 3.5 (Fast)', type: 'chat' },
+        { id: 'openai/gpt-4o', name: 'GPT-4o', type: 'chat' },
+        { id: 'openai/gpt-4o-mini', name: 'GPT-4o Mini (Cheap)', type: 'chat' },
+        { id: 'google/gemini-2.0-flash-exp', name: 'Gemini 2.0 Flash', type: 'chat' },
+        { id: 'google/gemini-pro-1.5', name: 'Gemini Pro 1.5', type: 'chat' },
+        { id: 'deepseek/deepseek-chat', name: 'DeepSeek Chat (Budget)', type: 'chat' },
+        { id: 'x-ai/grok-2', name: 'Grok 2', type: 'chat' },
+        { id: 'qwen/qwen-2.5-72b-instruct', name: 'Qwen 2.5 72B', type: 'chat' },
+        { id: 'openai/text-embedding-3-small', name: 'Text Embedding 3 Small', type: 'embedding', dimensions: 1536 },
+        { id: 'openai/text-embedding-3-large', name: 'Text Embedding 3 Large', type: 'embedding', dimensions: 3072 }
+    ],
+    openai: [
+        { id: 'gpt-4o', name: 'GPT-4o (Recommended)', type: 'chat' },
+        { id: 'gpt-4o-mini', name: 'GPT-4o Mini (Fast & Cheap)', type: 'chat' },
+        { id: 'gpt-4-turbo', name: 'GPT-4 Turbo', type: 'chat' },
+        { id: 'gpt-3.5-turbo', name: 'GPT-3.5 Turbo (Budget)', type: 'chat' },
+        { id: 'text-embedding-3-small', name: 'Text Embedding 3 Small', type: 'embedding', dimensions: 1536 },
+        { id: 'text-embedding-3-large', name: 'Text Embedding 3 Large', type: 'embedding', dimensions: 3072 },
+        { id: 'text-embedding-ada-002', name: 'Text Embedding Ada 002', type: 'embedding', dimensions: 1536 }
+    ],
+    anthropic: [
+        { id: 'claude-sonnet-4-20250514', name: 'Claude Sonnet 4 (Recommended)', type: 'chat' },
+        { id: 'claude-opus-4-20250514', name: 'Claude Opus 4 (Most Capable)', type: 'chat' },
+        { id: 'claude-3-5-haiku-20241022', name: 'Claude 3.5 Haiku (Fast)', type: 'chat' },
+        { id: 'claude-3-5-sonnet-20241022', name: 'Claude 3.5 Sonnet', type: 'chat' }
+    ],
+    google: [
+        { id: 'gemini-2.0-flash-exp', name: 'Gemini 2.0 Flash (Recommended)', type: 'chat' },
+        { id: 'gemini-1.5-pro', name: 'Gemini 1.5 Pro', type: 'chat' },
+        { id: 'gemini-1.5-flash', name: 'Gemini 1.5 Flash (Fast)', type: 'chat' },
+        { id: 'text-embedding-004', name: 'Text Embedding 004', type: 'embedding', dimensions: 768 }
+    ]
+};
 
+// Helper to get chat models for a provider
+function getChatModels(providerId) {
+    return (MODELS_BY_PROVIDER[providerId] || []).filter(m => m.type === 'chat');
+}
+
+// Helper to get embedding models for a provider
+function getEmbeddingModels(providerId) {
+    return (MODELS_BY_PROVIDER[providerId] || []).filter(m => m.type === 'embedding');
+}
+
+// Default AI Settings with multi-provider support
 const DEFAULT_AI_SETTINGS = {
-    openRouterApiKey: '',
-    selectedModel: 'google/gemini-3-flash-preview',
+    // Provider selection
+    provider: 'openrouter', // 'openrouter', 'openai', 'anthropic', 'google'
+
+    // API Keys for each provider
+    apiKeys: {
+        openrouter: '',
+        openai: '',
+        anthropic: '',
+        google: ''
+    },
+
+    // Selected models per provider
+    selectedModels: {
+        openrouter: 'google/gemini-2.0-flash-exp',
+        openai: 'gpt-4o-mini',
+        anthropic: 'claude-sonnet-4-20250514',
+        google: 'gemini-2.0-flash-exp'
+    },
+
+    // Embedding provider (can be different from chat provider)
+    embeddingProvider: 'openrouter',
+    selectedEmbeddingModels: {
+        openrouter: 'openai/text-embedding-3-small',
+        openai: 'text-embedding-3-small',
+        google: 'text-embedding-004'
+    },
+
+    // General settings
     temperature: 0.7,
     maxTokens: 1000,
     chatHistory: [],
+
     // Embedding settings
-    embeddingModel: 'openai/text-embedding-3-small',
     embeddingEnabled: true,
+
+    // Legacy support - will be migrated
+    openRouterApiKey: '',
+    selectedModel: '',
+    embeddingModel: '',
+
     // Elder Persona Customization
     elderPersona: {
         name: 'The Elder',
         title: 'Keeper of Wisdom',
         greeting: 'Greetings, traveler. I have watched many journeys unfold. What wisdom do you seek today?',
-        personality: 'wise' // 'wise', 'motivational', 'analytical', 'friendly', 'philosophical'
+        personality: 'wise'
     },
-    // Custom prompt additions
     customSystemPrompt: '',
     customKnowledge: '',
-    // Quick wisdom prompts (customizable)
     elderPrompts: {
         guidance: 'Based on my current life journey, what single piece of wisdom would most benefit me right now?',
         challenge: 'I seek a worthy challenge. Based on my weakest areas, suggest one meaningful quest I can undertake.',
         reflection: 'Help me reflect on my progress. What patterns do you see in my journey so far?',
         motivation: 'I need encouragement. Speak to me about my strengths and the path ahead.'
     },
-    // Elder Memory - stores relevant past entries for context
     elderMemoryEnabled: true,
-    elderMemoryCount: 3 // Number of relevant past entries to include
+    elderMemoryCount: 3
 };
+
+// Helper to get current API key
+function getActiveApiKey(settings) {
+    const provider = settings.ai?.provider || 'openrouter';
+    // Check new structure first, then legacy
+    return settings.ai?.apiKeys?.[provider] || settings.ai?.openRouterApiKey || '';
+}
+
+// Helper to get current chat model
+function getActiveChatModel(settings) {
+    const provider = settings.ai?.provider || 'openrouter';
+    return settings.ai?.selectedModels?.[provider] || settings.ai?.selectedModel || 'gpt-4o-mini';
+}
+
+// Helper to get current embedding model
+function getActiveEmbeddingModel(settings) {
+    const provider = settings.ai?.embeddingProvider || settings.ai?.provider || 'openrouter';
+    return settings.ai?.selectedEmbeddingModels?.[provider] || settings.ai?.embeddingModel || 'text-embedding-3-small';
+}
 
 // Journal Intelligence Settings
 const DEFAULT_JOURNAL_SETTINGS = {
@@ -1012,13 +1140,154 @@ class AIService {
         this.plugin = plugin;
     }
 
+    // Get current provider configuration
+    getProviderConfig() {
+        const providerId = this.plugin.settings.ai?.provider || 'openrouter';
+        return AI_PROVIDERS[providerId] || AI_PROVIDERS.openrouter;
+    }
+
+    // Get API key for current provider
+    getApiKey() {
+        const providerId = this.plugin.settings.ai?.provider || 'openrouter';
+        // Check new structure first, then legacy
+        return this.plugin.settings.ai?.apiKeys?.[providerId] ||
+               this.plugin.settings.ai?.openRouterApiKey || '';
+    }
+
+    // Get current model for chat
+    getChatModel() {
+        const providerId = this.plugin.settings.ai?.provider || 'openrouter';
+        return this.plugin.settings.ai?.selectedModels?.[providerId] ||
+               this.plugin.settings.ai?.selectedModel || 'gpt-4o-mini';
+    }
+
+    // Build request for OpenRouter/OpenAI (same format)
+    buildOpenAIRequest(messages, model, temperature, maxTokens) {
+        return {
+            model: model,
+            messages: messages,
+            temperature: temperature,
+            max_tokens: maxTokens
+        };
+    }
+
+    // Build request for Anthropic
+    buildAnthropicRequest(messages, model, temperature, maxTokens) {
+        // Extract system message
+        const systemMessage = messages.find(m => m.role === 'system')?.content || '';
+        const otherMessages = messages.filter(m => m.role !== 'system');
+
+        return {
+            model: model,
+            max_tokens: maxTokens,
+            temperature: temperature,
+            system: systemMessage,
+            messages: otherMessages.map(m => ({
+                role: m.role === 'assistant' ? 'assistant' : 'user',
+                content: m.content
+            }))
+        };
+    }
+
+    // Build request for Google AI
+    buildGoogleRequest(messages, temperature, maxTokens) {
+        // Convert to Google format
+        const systemInstruction = messages.find(m => m.role === 'system')?.content || '';
+        const otherMessages = messages.filter(m => m.role !== 'system');
+
+        return {
+            systemInstruction: { parts: [{ text: systemInstruction }] },
+            contents: otherMessages.map(m => ({
+                role: m.role === 'assistant' ? 'model' : 'user',
+                parts: [{ text: m.content }]
+            })),
+            generationConfig: {
+                temperature: temperature,
+                maxOutputTokens: maxTokens
+            }
+        };
+    }
+
+    // Make API call based on provider
+    async callProvider(messages, provider, apiKey, model, temperature, maxTokens) {
+        const config = AI_PROVIDERS[provider];
+
+        if (provider === 'google') {
+            // Google uses different URL structure with API key in query
+            const url = config.chatEndpoint.replace('{model}', model) + `?key=${apiKey}`;
+            const body = this.buildGoogleRequest(messages, temperature, maxTokens);
+
+            const response = await requestUrl({
+                url: url,
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(body)
+            });
+
+            if (response.status !== 200) {
+                throw new Error(`Google AI Error: ${response.status} - ${response.text}`);
+            }
+
+            const data = response.json;
+            return data.candidates?.[0]?.content?.parts?.[0]?.text || 'No response received.';
+
+        } else if (provider === 'anthropic') {
+            const body = this.buildAnthropicRequest(messages, model, temperature, maxTokens);
+            const headers = {
+                'Content-Type': 'application/json',
+                [config.authHeader]: config.authPrefix + apiKey,
+                ...config.extraHeaders
+            };
+
+            const response = await requestUrl({
+                url: config.chatEndpoint,
+                method: 'POST',
+                headers: headers,
+                body: JSON.stringify(body)
+            });
+
+            if (response.status !== 200) {
+                throw new Error(`Anthropic Error: ${response.status} - ${response.text}`);
+            }
+
+            const data = response.json;
+            return data.content?.[0]?.text || 'No response received.';
+
+        } else {
+            // OpenRouter and OpenAI use same format
+            const body = this.buildOpenAIRequest(messages, model, temperature, maxTokens);
+            const headers = {
+                'Content-Type': 'application/json',
+                [config.authHeader]: config.authPrefix + apiKey,
+                ...config.extraHeaders
+            };
+
+            const response = await requestUrl({
+                url: config.chatEndpoint,
+                method: 'POST',
+                headers: headers,
+                body: JSON.stringify(body)
+            });
+
+            if (response.status !== 200) {
+                throw new Error(`${config.name} Error: ${response.status} - ${response.text}`);
+            }
+
+            const data = response.json;
+            return data.choices?.[0]?.message?.content || 'No response received.';
+        }
+    }
+
     async chat(userMessage, includeContext = true, saveToHistory = true) {
-        const apiKey = this.plugin.settings.ai?.openRouterApiKey;
+        const apiKey = this.getApiKey();
+        const provider = this.plugin.settings.ai?.provider || 'openrouter';
+
         if (!apiKey) {
-            throw new Error('OpenRouter API key not configured. Go to Settings → Life RPG to add your API key.');
+            const providerName = AI_PROVIDERS[provider]?.name || 'AI';
+            throw new Error(`${providerName} API key not configured. Go to Settings → Life RPG to add your API key.`);
         }
 
-        const model = this.plugin.settings.ai?.selectedModel || 'openai/gpt-4o-mini';
+        const model = this.getChatModel();
         const temperature = this.plugin.settings.ai?.temperature || 0.7;
         const maxTokens = this.plugin.settings.ai?.maxTokens || 1000;
 
@@ -1035,7 +1304,6 @@ class AIService {
             const devLevel = getDevelopmentLevel(s.level);
             const currentPhase = determinePhase(s);
             const devInfo = DEVELOPMENT_LEVELS[devLevel];
-            const phaseInfo = PHASES[currentPhase];
 
             // Find weakest/strongest quadrant
             const quadrantEntries = Object.entries(quadrantScores);
@@ -1089,36 +1357,14 @@ On their daily path, they tend to ${s.habits.filter(h => !h.completed).length} s
 
         const messages = [
             { role: 'system', content: systemPrompt },
-            ...(this.plugin.settings.ai?.chatHistory || []).slice(-10), // Last 10 messages for context
+            ...(this.plugin.settings.ai?.chatHistory || []).slice(-10),
             { role: 'user', content: contextMessage + userMessage }
         ];
 
         try {
-            const response = await requestUrl({
-                url: OPENROUTER_API_URL,
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${apiKey}`,
-                    'HTTP-Referer': 'https://obsidian.md',
-                    'X-Title': 'Life RPG Plugin'
-                },
-                body: JSON.stringify({
-                    model: model,
-                    messages: messages,
-                    temperature: temperature,
-                    max_tokens: maxTokens
-                })
-            });
+            const assistantMessage = await this.callProvider(messages, provider, apiKey, model, temperature, maxTokens);
 
-            if (response.status !== 200) {
-                throw new Error(`API Error: ${response.status} - ${response.text}`);
-            }
-
-            const data = response.json;
-            const assistantMessage = data.choices[0]?.message?.content || 'No response received.';
-
-            // Save to chat history only if requested (skip for internal operations like journal analysis)
+            // Save to chat history only if requested
             if (saveToHistory) {
                 if (!this.plugin.settings.ai.chatHistory) {
                     this.plugin.settings.ai.chatHistory = [];
@@ -1171,7 +1417,6 @@ Only return the JSON array, no other text.`;
 
         // Parse JSON from response
         try {
-            // Extract JSON from response (handle markdown code blocks)
             let jsonStr = response;
             if (response.includes('```')) {
                 const match = response.match(/```(?:json)?\s*([\s\S]*?)```/);
@@ -1197,7 +1442,7 @@ Only return the JSON array, no other text.`;
 }
 
 // ============================================================================
-// EMBEDDING SERVICE CLASS - Semantic Search & Memory
+// EMBEDDING SERVICE CLASS - Multi-Provider Semantic Search & Memory
 // ============================================================================
 
 class EmbeddingService {
@@ -1205,37 +1450,97 @@ class EmbeddingService {
         this.plugin = plugin;
     }
 
-    // Create embedding for text using OpenRouter
-    async createEmbedding(text) {
-        const apiKey = this.plugin.settings.ai?.openRouterApiKey;
-        if (!apiKey) {
-            throw new Error('OpenRouter API key not configured');
+    // Get embedding provider and API key
+    getEmbeddingConfig() {
+        const ai = this.plugin.settings.ai || {};
+        // Embedding can use a different provider than chat
+        const provider = ai.embeddingProvider || ai.provider || 'openrouter';
+        const apiKey = ai.apiKeys?.[provider] || ai.openRouterApiKey || '';
+        const model = ai.selectedEmbeddingModels?.[provider] || ai.embeddingModel || 'text-embedding-3-small';
+
+        return { provider, apiKey, model };
+    }
+
+    // Create embedding using OpenRouter or OpenAI (same API format)
+    async createEmbeddingOpenAI(text, apiKey, model, endpoint, extraHeaders = {}) {
+        const response = await requestUrl({
+            url: endpoint,
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${apiKey}`,
+                ...extraHeaders
+            },
+            body: JSON.stringify({
+                model: model,
+                input: text.substring(0, 8000)
+            })
+        });
+
+        if (response.status !== 200) {
+            throw new Error(`Embedding API Error: ${response.status}`);
         }
 
-        const model = this.plugin.settings.ai?.embeddingModel || 'openai/text-embedding-3-small';
+        const data = response.json;
+        return data.data[0].embedding;
+    }
+
+    // Create embedding using Google AI
+    async createEmbeddingGoogle(text, apiKey, model) {
+        const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:embedContent?key=${apiKey}`;
+
+        const response = await requestUrl({
+            url: url,
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                model: `models/${model}`,
+                content: { parts: [{ text: text.substring(0, 8000) }] }
+            })
+        });
+
+        if (response.status !== 200) {
+            throw new Error(`Google Embedding Error: ${response.status}`);
+        }
+
+        const data = response.json;
+        return data.embedding.values;
+    }
+
+    // Create embedding for text - routes to correct provider
+    async createEmbedding(text) {
+        const { provider, apiKey, model } = this.getEmbeddingConfig();
+
+        if (!apiKey) {
+            const providerName = AI_PROVIDERS[provider]?.name || 'AI';
+            throw new Error(`${providerName} API key not configured for embeddings`);
+        }
+
+        // Check if provider supports embeddings
+        if (provider === 'anthropic') {
+            throw new Error('Anthropic does not support embeddings. Please use OpenRouter, OpenAI, or Google for embeddings.');
+        }
 
         try {
-            const response = await requestUrl({
-                url: 'https://openrouter.ai/api/v1/embeddings',
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${apiKey}`,
-                    'HTTP-Referer': 'https://obsidian.md',
-                    'X-Title': 'Life RPG Plugin'
-                },
-                body: JSON.stringify({
-                    model: model,
-                    input: text.substring(0, 8000) // Limit text length
-                })
-            });
-
-            if (response.status !== 200) {
-                throw new Error(`Embedding API Error: ${response.status}`);
+            if (provider === 'google') {
+                return await this.createEmbeddingGoogle(text, apiKey, model);
+            } else if (provider === 'openai') {
+                return await this.createEmbeddingOpenAI(
+                    text,
+                    apiKey,
+                    model,
+                    'https://api.openai.com/v1/embeddings'
+                );
+            } else {
+                // OpenRouter (default)
+                return await this.createEmbeddingOpenAI(
+                    text,
+                    apiKey,
+                    model,
+                    'https://openrouter.ai/api/v1/embeddings',
+                    { 'HTTP-Referer': 'https://obsidian.md', 'X-Title': 'Life RPG Plugin' }
+                );
             }
-
-            const data = response.json;
-            return data.data[0].embedding;
         } catch (error) {
             console.error('Embedding Service Error:', error);
             throw error;
@@ -4802,47 +5107,92 @@ class LifeRPGSettingTab extends PluginSettingTab {
         // AI Settings Section
         containerEl.createEl('h3', { text: '🤖 AI Configuration' });
 
+        const ai = this.plugin.settings.ai || {};
+        const currentProvider = ai.provider || 'openrouter';
+
+        // Provider Selection
         new Setting(containerEl)
-            .setName('OpenRouter API Key')
-            .setDesc('Get your API key from openrouter.ai. Required for AI Coach and Quest Generator.')
+            .setName('AI Provider')
+            .setDesc('Choose your AI service provider for chat and coaching.')
+            .addDropdown(dd => {
+                Object.entries(AI_PROVIDERS).forEach(([id, provider]) => {
+                    dd.addOption(id, `${provider.name} - ${provider.description}`);
+                });
+                dd.setValue(currentProvider);
+                dd.onChange(async (value) => {
+                    if (!this.plugin.settings.ai) {
+                        this.plugin.settings.ai = JSON.parse(JSON.stringify(DEFAULT_AI_SETTINGS));
+                    }
+                    this.plugin.settings.ai.provider = value;
+                    await this.plugin.saveSettings();
+                    this.display(); // Refresh to show provider-specific options
+                });
+            });
+
+        // API Key for current provider
+        const providerConfig = AI_PROVIDERS[currentProvider];
+        const apiKeyPlaceholders = {
+            openrouter: 'sk-or-v1-...',
+            openai: 'sk-...',
+            anthropic: 'sk-ant-...',
+            google: 'AIza...'
+        };
+
+        new Setting(containerEl)
+            .setName(`${providerConfig.name} API Key`)
+            .setDesc(`Enter your ${providerConfig.name} API key`)
             .addText(text => text
-                .setPlaceholder('sk-or-v1-...')
-                .setValue(this.plugin.settings.ai?.openRouterApiKey || '')
+                .setPlaceholder(apiKeyPlaceholders[currentProvider] || 'Enter API key...')
+                .setValue(ai.apiKeys?.[currentProvider] || ai.openRouterApiKey || '')
                 .onChange(async (value) => {
                     if (!this.plugin.settings.ai) {
-                        this.plugin.settings.ai = { ...DEFAULT_AI_SETTINGS };
+                        this.plugin.settings.ai = JSON.parse(JSON.stringify(DEFAULT_AI_SETTINGS));
                     }
-                    this.plugin.settings.ai.openRouterApiKey = value;
+                    if (!this.plugin.settings.ai.apiKeys) {
+                        this.plugin.settings.ai.apiKeys = {};
+                    }
+                    this.plugin.settings.ai.apiKeys[currentProvider] = value;
+                    // Also update legacy field for backwards compatibility
+                    if (currentProvider === 'openrouter') {
+                        this.plugin.settings.ai.openRouterApiKey = value;
+                    }
                     await this.plugin.saveSettings();
                 }));
 
-        new Setting(containerEl)
-            .setName('AI Model')
-            .setDesc('Choose which AI model to use for coaching and quest generation.')
-            .addDropdown(dd => {
-                AVAILABLE_MODELS.forEach(model => {
-                    dd.addOption(model.id, `${model.name} (${model.provider})`);
+        // Model Selection for current provider
+        const chatModels = getChatModels(currentProvider);
+        if (chatModels.length > 0) {
+            new Setting(containerEl)
+                .setName('Chat Model')
+                .setDesc(`Choose which ${providerConfig.name} model to use for the Elder and coaching.`)
+                .addDropdown(dd => {
+                    chatModels.forEach(model => {
+                        dd.addOption(model.id, model.name);
+                    });
+                    dd.setValue(ai.selectedModels?.[currentProvider] || chatModels[0].id);
+                    dd.onChange(async (value) => {
+                        if (!this.plugin.settings.ai) {
+                            this.plugin.settings.ai = JSON.parse(JSON.stringify(DEFAULT_AI_SETTINGS));
+                        }
+                        if (!this.plugin.settings.ai.selectedModels) {
+                            this.plugin.settings.ai.selectedModels = {};
+                        }
+                        this.plugin.settings.ai.selectedModels[currentProvider] = value;
+                        await this.plugin.saveSettings();
+                    });
                 });
-                dd.setValue(this.plugin.settings.ai?.selectedModel || 'openai/gpt-4o-mini');
-                dd.onChange(async (value) => {
-                    if (!this.plugin.settings.ai) {
-                        this.plugin.settings.ai = { ...DEFAULT_AI_SETTINGS };
-                    }
-                    this.plugin.settings.ai.selectedModel = value;
-                    await this.plugin.saveSettings();
-                });
-            });
+        }
 
         new Setting(containerEl)
             .setName('Temperature')
             .setDesc('Controls randomness. Lower = more focused, Higher = more creative (0.0 - 1.0)')
             .addSlider(slider => slider
                 .setLimits(0, 1, 0.1)
-                .setValue(this.plugin.settings.ai?.temperature || 0.7)
+                .setValue(ai.temperature || 0.7)
                 .setDynamicTooltip()
                 .onChange(async (value) => {
                     if (!this.plugin.settings.ai) {
-                        this.plugin.settings.ai = { ...DEFAULT_AI_SETTINGS };
+                        this.plugin.settings.ai = JSON.parse(JSON.stringify(DEFAULT_AI_SETTINGS));
                     }
                     this.plugin.settings.ai.temperature = value;
                     await this.plugin.saveSettings();
@@ -4852,31 +5202,81 @@ class LifeRPGSettingTab extends PluginSettingTab {
             .setName('Max Tokens')
             .setDesc('Maximum length of AI responses (100 - 4000)')
             .addText(text => text
-                .setValue(String(this.plugin.settings.ai?.maxTokens || 1000))
+                .setValue(String(ai.maxTokens || 1000))
                 .onChange(async (value) => {
                     const num = parseInt(value);
                     if (!isNaN(num) && num >= 100 && num <= 4000) {
                         if (!this.plugin.settings.ai) {
-                            this.plugin.settings.ai = { ...DEFAULT_AI_SETTINGS };
+                            this.plugin.settings.ai = JSON.parse(JSON.stringify(DEFAULT_AI_SETTINGS));
                         }
                         this.plugin.settings.ai.maxTokens = num;
                         await this.plugin.saveSettings();
                     }
                 }));
 
-        // Info section
-        containerEl.createEl('h3', { text: '📖 How to get an API Key' });
+        // Provider-specific info
         const infoEl = containerEl.createDiv({ cls: 'rpg-settings-info' });
+        const providerInstructions = {
+            openrouter: {
+                title: '📖 OpenRouter Setup',
+                steps: [
+                    'Go to openrouter.ai and create an account',
+                    'Navigate to Keys section',
+                    'Create a new API key',
+                    'Copy and paste it above'
+                ],
+                note: 'OpenRouter provides access to 100+ AI models with one API key. Pay only for what you use.'
+            },
+            openai: {
+                title: '📖 OpenAI Setup',
+                steps: [
+                    'Go to platform.openai.com',
+                    'Sign in or create an account',
+                    'Go to API Keys section',
+                    'Create a new secret key'
+                ],
+                note: 'OpenAI provides GPT models directly. Requires a paid account with credits.'
+            },
+            anthropic: {
+                title: '📖 Anthropic Setup',
+                steps: [
+                    'Go to console.anthropic.com',
+                    'Sign in or create an account',
+                    'Go to API Keys section',
+                    'Create a new key'
+                ],
+                note: 'Anthropic provides Claude models directly. Note: Anthropic does not support embeddings.'
+            },
+            google: {
+                title: '📖 Google AI Setup',
+                steps: [
+                    'Go to makersuite.google.com',
+                    'Sign in with your Google account',
+                    'Click "Get API key"',
+                    'Create a key for a new or existing project'
+                ],
+                note: 'Google AI Studio provides Gemini models. Free tier available with rate limits.'
+            }
+        };
+
+        const info = providerInstructions[currentProvider];
+        infoEl.createEl('h4', { text: info.title });
         infoEl.createEl('ol', {}, ol => {
-            ol.createEl('li', { text: 'Go to openrouter.ai and create an account' });
-            ol.createEl('li', { text: 'Navigate to Keys section' });
-            ol.createEl('li', { text: 'Create a new API key' });
-            ol.createEl('li', { text: 'Copy and paste it above' });
+            info.steps.forEach(step => {
+                ol.createEl('li', { text: step });
+            });
         });
-        infoEl.createEl('p', {
-            text: 'OpenRouter provides access to 100+ AI models with one API key. Pricing varies by model.',
-            cls: 'rpg-settings-note'
-        });
+        infoEl.createEl('p', { text: info.note, cls: 'rpg-settings-note' });
+
+        // Show configured providers status
+        const configuredProviders = Object.entries(AI_PROVIDERS)
+            .filter(([id]) => ai.apiKeys?.[id] || (id === 'openrouter' && ai.openRouterApiKey))
+            .map(([id, config]) => config.name);
+
+        if (configuredProviders.length > 0) {
+            const statusEl = containerEl.createDiv({ cls: 'rpg-settings-status' });
+            statusEl.innerHTML = `<strong>✅ Configured providers:</strong> ${configuredProviders.join(', ')}`;
+        }
 
         // Journal Intelligence Section
         containerEl.createEl('h3', { text: '📓 Journal Intelligence' });
@@ -4957,33 +5357,78 @@ class LifeRPGSettingTab extends PluginSettingTab {
 
         new Setting(containerEl)
             .setName('Enable Embeddings')
-            .setDesc('Create embeddings for journal entries to enable semantic search and Elder memory. Requires API key.')
+            .setDesc('Create embeddings for journal entries to enable semantic search and Elder memory.')
             .addToggle(toggle => toggle
                 .setValue(this.plugin.settings.ai?.embeddingEnabled ?? true)
                 .onChange(async (value) => {
                     if (!this.plugin.settings.ai) {
-                        this.plugin.settings.ai = { ...DEFAULT_AI_SETTINGS };
+                        this.plugin.settings.ai = JSON.parse(JSON.stringify(DEFAULT_AI_SETTINGS));
                     }
                     this.plugin.settings.ai.embeddingEnabled = value;
                     await this.plugin.saveSettings();
                 }));
 
+        // Embedding Provider Selection (only providers that support embeddings)
+        const embeddingProviders = Object.entries(AI_PROVIDERS)
+            .filter(([id, config]) => config.supportsEmbeddings);
+
+        const currentEmbeddingProvider = this.plugin.settings.ai?.embeddingProvider ||
+                                         this.plugin.settings.ai?.provider || 'openrouter';
+
         new Setting(containerEl)
-            .setName('Embedding Model')
-            .setDesc('Choose which model to use for creating embeddings.')
+            .setName('Embedding Provider')
+            .setDesc('Choose which provider to use for embeddings (can be different from chat).')
             .addDropdown(dd => {
-                EMBEDDING_MODELS.forEach(model => {
-                    dd.addOption(model.id, `${model.name} (${model.provider})`);
+                embeddingProviders.forEach(([id, config]) => {
+                    dd.addOption(id, config.name);
                 });
-                dd.setValue(this.plugin.settings.ai?.embeddingModel || 'openai/text-embedding-3-small');
+                dd.setValue(currentEmbeddingProvider);
                 dd.onChange(async (value) => {
                     if (!this.plugin.settings.ai) {
-                        this.plugin.settings.ai = { ...DEFAULT_AI_SETTINGS };
+                        this.plugin.settings.ai = JSON.parse(JSON.stringify(DEFAULT_AI_SETTINGS));
                     }
-                    this.plugin.settings.ai.embeddingModel = value;
+                    this.plugin.settings.ai.embeddingProvider = value;
                     await this.plugin.saveSettings();
+                    this.display(); // Refresh to show provider-specific models
                 });
             });
+
+        // Embedding Model Selection for current embedding provider
+        const embeddingModels = getEmbeddingModels(currentEmbeddingProvider);
+        if (embeddingModels.length > 0) {
+            new Setting(containerEl)
+                .setName('Embedding Model')
+                .setDesc(`Choose which ${AI_PROVIDERS[currentEmbeddingProvider].name} model to use for embeddings.`)
+                .addDropdown(dd => {
+                    embeddingModels.forEach(model => {
+                        dd.addOption(model.id, `${model.name} (${model.dimensions}d)`);
+                    });
+                    const currentModel = this.plugin.settings.ai?.selectedEmbeddingModels?.[currentEmbeddingProvider] ||
+                                        embeddingModels[0].id;
+                    dd.setValue(currentModel);
+                    dd.onChange(async (value) => {
+                        if (!this.plugin.settings.ai) {
+                            this.plugin.settings.ai = JSON.parse(JSON.stringify(DEFAULT_AI_SETTINGS));
+                        }
+                        if (!this.plugin.settings.ai.selectedEmbeddingModels) {
+                            this.plugin.settings.ai.selectedEmbeddingModels = {};
+                        }
+                        this.plugin.settings.ai.selectedEmbeddingModels[currentEmbeddingProvider] = value;
+                        await this.plugin.saveSettings();
+                    });
+                });
+        } else {
+            const noEmbedMsg = containerEl.createDiv({ cls: 'rpg-settings-warning' });
+            noEmbedMsg.textContent = `⚠️ ${AI_PROVIDERS[currentEmbeddingProvider]?.name || 'This provider'} does not support embeddings. Please choose a different embedding provider.`;
+        }
+
+        // Check if embedding provider has API key configured
+        const embeddingApiKey = this.plugin.settings.ai?.apiKeys?.[currentEmbeddingProvider] ||
+                               (currentEmbeddingProvider === 'openrouter' ? this.plugin.settings.ai?.openRouterApiKey : '');
+        if (!embeddingApiKey && embeddingModels.length > 0) {
+            const warningEl = containerEl.createDiv({ cls: 'rpg-settings-warning' });
+            warningEl.textContent = `⚠️ No API key configured for ${AI_PROVIDERS[currentEmbeddingProvider].name}. Please add your API key above.`;
+        }
 
         new Setting(containerEl)
             .setName('Elder Memory')
@@ -4992,7 +5437,7 @@ class LifeRPGSettingTab extends PluginSettingTab {
                 .setValue(this.plugin.settings.ai?.elderMemoryEnabled ?? true)
                 .onChange(async (value) => {
                     if (!this.plugin.settings.ai) {
-                        this.plugin.settings.ai = { ...DEFAULT_AI_SETTINGS };
+                        this.plugin.settings.ai = JSON.parse(JSON.stringify(DEFAULT_AI_SETTINGS));
                     }
                     this.plugin.settings.ai.elderMemoryEnabled = value;
                     await this.plugin.saveSettings();
@@ -5007,7 +5452,7 @@ class LifeRPGSettingTab extends PluginSettingTab {
                 .setDynamicTooltip()
                 .onChange(async (value) => {
                     if (!this.plugin.settings.ai) {
-                        this.plugin.settings.ai = { ...DEFAULT_AI_SETTINGS };
+                        this.plugin.settings.ai = JSON.parse(JSON.stringify(DEFAULT_AI_SETTINGS));
                     }
                     this.plugin.settings.ai.elderMemoryCount = value;
                     await this.plugin.saveSettings();
@@ -5020,6 +5465,7 @@ class LifeRPGSettingTab extends PluginSettingTab {
             <p><strong>Embedding Statistics:</strong></p>
             <ul>
                 <li>Journal entries indexed: ${embeddingsCount}</li>
+                <li>Embedding provider: ${AI_PROVIDERS[currentEmbeddingProvider]?.name || currentEmbeddingProvider}</li>
                 <li>Semantic search: ${embeddingsCount > 0 ? '✅ Available' : '❌ Sync journals first'}</li>
                 <li>Elder memory: ${this.plugin.settings.ai?.elderMemoryEnabled && embeddingsCount > 0 ? '✅ Active' : '❌ Needs embeddings'}</li>
             </ul>
